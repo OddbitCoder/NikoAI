@@ -12,7 +12,7 @@ else:
     device = torch.device("cpu")
     print("No GPU available, using CPU instead")
 
-waveform, sample_rate = torchaudio.load("/files/dont_erase_me.wav")
+waveform, sample_rate = torchaudio.load("/files/borrow.wav")
 audio_in_memory = {"waveform": waveform, "sample_rate": sample_rate}
 
 pipeline = Pipeline.from_pretrained("/files/config.yaml")
