@@ -1,0 +1,19 @@
+version: "3.7"
+
+services:
+  sd:
+    image: mgrcar/sd:0.1
+    build: .
+    ports:
+      - "7860:7860"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    volumes:
+      - ./files:/files
+      - ./models:/root/sd/models
+      - ./extensions:/root/sd/extensions
