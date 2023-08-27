@@ -37,6 +37,10 @@ RUN sed -i 's/start()//g' launch.py
 RUN ./webui.sh -f --skip-torch-cuda-test --xformers
 RUN rm launch.py && mv launch.py.bak launch.py
 
+# install ControlNet deps
+
+RUN venv/bin/python3 -m pip install mediapipe svglib fvcore --prefer-binary
+
 # all done
 
 ENTRYPOINT ["/root/sd/webui.sh"]

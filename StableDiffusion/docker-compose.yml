@@ -17,3 +17,4 @@ services:
       - ./files:/files
       - ./models:/root/sd/models
       - ./extensions:/root/sd/extensions
+      - ./cache:/root/.cache
