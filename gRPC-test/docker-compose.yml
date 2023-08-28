@@ -1,0 +1,18 @@
+version: "3.7"
+
+services:
+  grpc-test:
+    image: mgrcar/grpc-test:0.1
+    build: .
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    ports:
+      - "9010:9010"
+    volumes:
+      - ./files:/files
+#      - ./models:/models
