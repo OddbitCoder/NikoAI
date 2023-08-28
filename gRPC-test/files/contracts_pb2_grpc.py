@@ -19,12 +19,23 @@ class SvcStub(object):
                 request_serializer=contracts__pb2.CalculateRequest.SerializeToString,
                 response_deserializer=contracts__pb2.CalculateReply.FromString,
                 )
+        self.Median = channel.stream_stream(
+                '/Svc/Median',
+                request_serializer=contracts__pb2.Temperature.SerializeToString,
+                response_deserializer=contracts__pb2.Temperature.FromString,
+                )
 
 
 class SvcServicer(object):
     """Missing associated documentation comment in .proto file."""
 
     def Calculate(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def Median(self, request_iterator, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -37,6 +48,11 @@ def add_SvcServicer_to_server(servicer, server):
                     servicer.Calculate,
                     request_deserializer=contracts__pb2.CalculateRequest.FromString,
                     response_serializer=contracts__pb2.CalculateReply.SerializeToString,
+            ),
+            'Median': grpc.stream_stream_rpc_method_handler(
+                    servicer.Median,
+                    request_deserializer=contracts__pb2.Temperature.FromString,
+                    response_serializer=contracts__pb2.Temperature.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -62,5 +78,22 @@ class Svc(object):
         return grpc.experimental.unary_unary(request, target, '/Svc/Calculate',
             contracts__pb2.CalculateRequest.SerializeToString,
             contracts__pb2.CalculateReply.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def Median(request_iterator,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.stream_stream(request_iterator, target, '/Svc/Median',
+            contracts__pb2.Temperature.SerializeToString,
+            contracts__pb2.Temperature.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
