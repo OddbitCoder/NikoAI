@@ -18,13 +18,13 @@ namespace OddbitAi.AudioRecorder
         }
 
         //WaveFileWriter writer = null;
-        AudioBuffer buffer = new(160000); // 10 seconds
         WaveInEvent waveIn = new() {
             BufferMilliseconds = 250,
             NumberOfBuffers = 2,
             //DeviceNumber = 0,
             WaveFormat = new WaveFormat(8000, 16, 1)
         };
+        AudioBuffer buffer;
         bool closing = false;
         string outputFilePath;
 
@@ -35,6 +35,7 @@ namespace OddbitAi.AudioRecorder
             var outputFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "NAudio");
             Directory.CreateDirectory(outputFolder);
             outputFilePath = Path.Combine(outputFolder, "recorded.wav");
+            buffer = new(160000, waveIn.WaveFormat); // 10 seconds
 
             waveIn.DataAvailable += (s, a) =>
             {
@@ -56,6 +57,9 @@ namespace OddbitAi.AudioRecorder
                 //writer = null;
                 //buffer.WriteToFile(outputFilePath, waveIn.WaveFormat);
                 File.WriteAllBytes(outputFilePath, buffer.GetWavBytes(waveIn.WaveFormat));
+                Console.WriteLine(buffer.StartTimestampUtc);
+                Console.WriteLine(buffer.EndTimestampUtc);
+                buffer.Clear();
                 buttonRecord.Enabled = true;
                 buttonStop.Enabled = false;
                 if (closing)
