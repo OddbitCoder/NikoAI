@@ -17,16 +17,18 @@ namespace OddbitAi.AudioRecorder
             InitializeComponent();
         }
 
-        //WaveFileWriter writer = null;
-        WaveInEvent waveIn = new() {
+        private WaveInEvent waveIn = new() {
             BufferMilliseconds = 250,
             NumberOfBuffers = 2,
             //DeviceNumber = 0,
             WaveFormat = new WaveFormat(8000, 16, 1)
         };
-        AudioBuffer buffer;
-        bool closing = false;
-        string outputFilePath;
+        private AudioBuffer buffer;
+        private bool closing = false;
+        private TimeSpan snapshotTimeStep
+            = TimeSpan.FromSeconds(2); // make a snapshot every 2 seconds
+        private DateTime? lastSnapshotTimestamp
+            = null;
 
         private void AudioRecorderMainForm_Load(object sender, EventArgs e)
         {
@@ -34,31 +36,22 @@ namespace OddbitAi.AudioRecorder
 
             var outputFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "NAudio");
             Directory.CreateDirectory(outputFolder);
-            outputFilePath = Path.Combine(outputFolder, "recorded.wav");
-            buffer = new(160000, waveIn.WaveFormat); // 10 seconds
+            buffer = new(16000 * 10, waveIn.WaveFormat); // 10 seconds
 
             waveIn.DataAvailable += (s, a) =>
             {
-                //writer.Write(a.Buffer, 0, a.BytesRecorded);
-                //if (writer.Position > waveIn.WaveFormat.AverageBytesPerSecond * 30)
-                //{
-                //    waveIn.StopRecording();
-                //}
                 buffer.WriteData(a.Buffer, a.BytesRecorded);
-                if (buffer.RawByteCount == 160000) 
+                var ts = DateTime.UtcNow;
+                if ((lastSnapshotTimestamp == null && buffer.RawByteCount >= 16000 * 2) || ts - lastSnapshotTimestamp >= snapshotTimeStep)
                 {
-                    waveIn.StopRecording();
+                    Console.WriteLine(buffer.SnapshotId);
+                    buffer.WriteToFile(Path.Combine(outputFolder, buffer.SnapshotId + ".wav"), waveIn.WaveFormat);
+                    lastSnapshotTimestamp = ts;
                 }
             };
 
             waveIn.RecordingStopped += (s, a) =>
             {
-                //writer?.Dispose();
-                //writer = null;
-                //buffer.WriteToFile(outputFilePath, waveIn.WaveFormat);
-                File.WriteAllBytes(outputFilePath, buffer.GetWavBytes(waveIn.WaveFormat));
-                Console.WriteLine(buffer.StartTimestampUtc);
-                Console.WriteLine(buffer.EndTimestampUtc);
                 buffer.Clear();
                 buttonRecord.Enabled = true;
                 buttonStop.Enabled = false;
@@ -71,7 +64,6 @@ namespace OddbitAi.AudioRecorder
 
         private void buttonRecord_Click(object sender, EventArgs e)
         {
-            //writer = new WaveFileWriter(outputFilePath, waveIn.WaveFormat);
             waveIn.StartRecording();
             buttonRecord.Enabled = false;
             buttonStop.Enabled = true;

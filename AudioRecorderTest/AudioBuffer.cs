@@ -5,8 +5,10 @@ namespace OddbitAi.AudioRecorder
     internal class AudioBuffer
     {
         private readonly int bufferSize; // in bytes
-        private long writeTimestamp = -1;
-        private long startTimestamp = -1;
+        private DateTime? writeTimestamp 
+            = null;
+        private DateTime? startTimestamp 
+            = null;
         private readonly WaveFormat wavInFmt;
         private readonly int bytesPerSecond;
 
@@ -17,14 +19,12 @@ namespace OddbitAi.AudioRecorder
             => rawData.ToArray();
         public int RawByteCount
             => rawData.Count;
-        public long EndTimestampTicks
-            => writeTimestamp;
-        public long StartTimestampTicks
-            => startTimestamp;
         public DateTime? EndTimestampUtc
-            => writeTimestamp >= 0 ? new(writeTimestamp, DateTimeKind.Utc) : null;
+            => writeTimestamp;
         public DateTime? StartTimestampUtc
-            => startTimestamp >= 0 ? new(startTimestamp, DateTimeKind.Utc) : null;
+            => startTimestamp;
+        public string SnapshotId
+            => string.Format($"{StartTimestampUtc:yyyyMMddHHmmss.fff}-{EndTimestampUtc:yyyyMMddHHmmss.fff}");
 
         public void Clear()
         {
@@ -40,7 +40,7 @@ namespace OddbitAi.AudioRecorder
 
         public void WriteData(byte[] buffer, int bufferLen)
         {
-            writeTimestamp = DateTime.UtcNow.Ticks;
+            writeTimestamp = DateTime.UtcNow;
             for (int i = 0; i < bufferLen; i++) 
             {
                 rawData.Enqueue(buffer[i]);
@@ -50,8 +50,7 @@ namespace OddbitAi.AudioRecorder
                 }
             }
             double seconds = (double)rawData.Count / bytesPerSecond;
-            long ticks = (long)(seconds * TimeSpan.TicksPerSecond);
-            startTimestamp = writeTimestamp - ticks;
+            startTimestamp = writeTimestamp - TimeSpan.FromSeconds(seconds);
         }
 
         public void WriteToFile(string fileName, WaveFormat? wavFormat = null)
