@@ -1,6 +1,6 @@
 FROM nvidia/cuda:12.2.0-devel-ubuntu20.04
 
-ENV TZ=Europe/Belgrade
+ENV TZ=Europe/Ljubljana
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 RUN apt-get update
@@ -24,6 +24,11 @@ WORKDIR /app
 RUN git clone https://github.com/openai/whisper.git .
 # install with pip
 RUN pip install git+https://github.com/openai/whisper.git 
+
+# gRPC stuff
+
+RUN pip install grpcio
+RUN pip install grpcio-tools
 
 # all done
 

@@ -11,6 +11,8 @@ services:
             - driver: nvidia
               count: 1
               capabilities: [gpu]
+    ports:
+      - "9010:9010"
     volumes:
       - ./files:/files
-      - ./models:/models      
+      - ./models:/root/.cache/whisper
