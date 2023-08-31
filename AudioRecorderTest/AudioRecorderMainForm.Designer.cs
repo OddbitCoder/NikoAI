@@ -53,14 +53,14 @@
             buttonStop.UseVisualStyleBackColor = true;
             buttonStop.Click += buttonStop_Click;
             // 
-            // Form1
+            // AudioRecorderMainForm
             // 
             AutoScaleDimensions = new SizeF(17F, 41F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1759, 862);
             Controls.Add(buttonStop);
             Controls.Add(buttonRecord);
-            Name = "Form1";
+            Name = "AudioRecorderMainForm";
             Text = "Audio Recorder Test";
             FormClosing += AudioRecorderMainForm_FormClosing;
             Load += AudioRecorderMainForm_Load;

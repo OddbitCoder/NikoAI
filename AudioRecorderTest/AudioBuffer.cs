@@ -5,11 +5,10 @@ namespace OddbitAi.AudioRecorder
     internal class AudioBuffer
     {
         private readonly int bufferSize; // in bytes
-        private DateTime? writeTimestamp 
+        private DateTime? startTimestamp
             = null;
-        private DateTime? startTimestamp 
+        private DateTime? endTimestamp 
             = null;
-        private readonly WaveFormat wavInFmt;
         private readonly int bytesPerSecond;
 
         private readonly Queue<byte> rawData
@@ -19,10 +18,10 @@ namespace OddbitAi.AudioRecorder
             => rawData.ToArray();
         public int RawByteCount
             => rawData.Count;
-        public DateTime? EndTimestampUtc
-            => writeTimestamp;
         public DateTime? StartTimestampUtc
             => startTimestamp;
+        public DateTime? EndTimestampUtc
+            => endTimestamp;
         public string SnapshotId
             => string.Format($"{StartTimestampUtc:yyyyMMddHHmmss.fff}-{EndTimestampUtc:yyyyMMddHHmmss.fff}");
 
@@ -33,14 +32,13 @@ namespace OddbitAi.AudioRecorder
 
         public AudioBuffer(int bufferSize, WaveFormat wavInFmt)
         {
-            this.wavInFmt = wavInFmt;
             this.bufferSize = bufferSize;
             this.bytesPerSecond = wavInFmt.SampleRate * wavInFmt.Channels * (wavInFmt.BitsPerSample / 8);
         }
 
         public void WriteData(byte[] buffer, int bufferLen)
         {
-            writeTimestamp = DateTime.UtcNow;
+            endTimestamp = DateTime.UtcNow;
             for (int i = 0; i < bufferLen; i++) 
             {
                 rawData.Enqueue(buffer[i]);
@@ -50,12 +48,11 @@ namespace OddbitAi.AudioRecorder
                 }
             }
             double seconds = (double)rawData.Count / bytesPerSecond;
-            startTimestamp = writeTimestamp - TimeSpan.FromSeconds(seconds);
+            startTimestamp = endTimestamp - TimeSpan.FromSeconds(seconds);
         }
 
-        public void WriteToFile(string fileName, WaveFormat? wavFormat = null)
+        public void WriteToFile(string fileName, WaveFormat wavFormat)
         {
-            wavFormat ??= wavInFmt;
             using (var writer = new WaveFileWriter(fileName, wavFormat))
             {
                 var rawData = RawData; // make snapshot
@@ -64,9 +61,8 @@ namespace OddbitAi.AudioRecorder
             }
         }
 
-        public byte[] GetWavBytes(WaveFormat? wavFormat = null)
+        public byte[] GetWavBytes(WaveFormat wavFormat)
         {
-            wavFormat ??= wavInFmt;
             var ms = new MemoryStream();
             using (var writer = new WaveFileWriter(ms, wavFormat))
             {
