@@ -20,6 +20,8 @@ namespace OddbitAi.AudioRecorder
         public AudioRecorderMainForm()
         {
             InitializeComponent();
+
+            buffer = new(16000 * 10, waveIn.WaveFormat); // 10 seconds
         }
 
         private void AudioRecorderMainForm_Load(object sender, EventArgs e)
@@ -29,7 +31,6 @@ namespace OddbitAi.AudioRecorder
 
             var outputFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "NAudio");
             Directory.CreateDirectory(outputFolder);
-            buffer = new(16000 * 10, waveIn.WaveFormat); // 10 seconds
 
             waveIn.DataAvailable += (s, a) =>
             {
@@ -77,11 +78,11 @@ namespace OddbitAi.AudioRecorder
         };
         private AudioBuffer buffer;
         private bool closing = false;
-        private TimeSpan snapshotTimeStep
+        private readonly TimeSpan snapshotTimeStep
             = TimeSpan.FromSeconds(2); // make a snapshot every 2 seconds
         private DateTime? lastSnapshotTimestamp
             = null;
-        private WhisperService.WhisperServiceClient whisperClient;
+        private WhisperService.WhisperServiceClient? whisperClient;
 
         private void buttonRecord_Click(object sender, EventArgs e)
         {
