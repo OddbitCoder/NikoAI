@@ -13,7 +13,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0f\x63ontracts.proto\"(\n\x13ProcessAudioRequest\x12\x11\n\taudioData\x18\x01 \x01(\x0c\"#\n\x11ProcessAudioReply\x12\x0e\n\x06result\x18\x01 \x01(\x05\x32J\n\x0eWhisperService\x12\x38\n\x0cProcessAudio\x12\x14.ProcessAudioRequest\x1a\x12.ProcessAudioReplyB\x13\xaa\x02\x10OddbitAi.Whisperb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0f\x63ontracts.proto\"(\n\x13ProcessAudioRequest\x12\x11\n\taudioData\x18\x01 \x01(\x0c\"!\n\x11ProcessAudioReply\x12\x0c\n\x04text\x18\x01 \x01(\t2J\n\x0eWhisperService\x12\x38\n\x0cProcessAudio\x12\x14.ProcessAudioRequest\x1a\x12.ProcessAudioReplyB\x13\xaa\x02\x10OddbitAi.Whisperb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -25,7 +25,7 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   _globals['_PROCESSAUDIOREQUEST']._serialized_start=19
   _globals['_PROCESSAUDIOREQUEST']._serialized_end=59
   _globals['_PROCESSAUDIOREPLY']._serialized_start=61
-  _globals['_PROCESSAUDIOREPLY']._serialized_end=96
-  _globals['_WHISPERSERVICE']._serialized_start=98
-  _globals['_WHISPERSERVICE']._serialized_end=172
+  _globals['_PROCESSAUDIOREPLY']._serialized_end=94
+  _globals['_WHISPERSERVICE']._serialized_start=96
+  _globals['_WHISPERSERVICE']._serialized_end=170
 # @@protoc_insertion_point(module_scope)
