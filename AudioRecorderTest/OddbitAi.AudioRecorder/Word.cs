@@ -5,7 +5,7 @@ namespace OddbitAi.AudioRecorder
     internal class Word : WordDto
     {
         public int SegmentId { get; set; }
-        public DateTime StartTimeUtc { get; set; }
-        public DateTime EndTimeUtc { get; set; }
+        public DateTime StartTime { get; set; }
+        public DateTime EndTime { get; set; }
     }
 }

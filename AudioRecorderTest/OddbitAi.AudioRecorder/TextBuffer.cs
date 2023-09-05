@@ -2,18 +2,38 @@
 {
     internal static class TextBufferExtensions
     {
+        public static string? Token(this Word word)
+        {
+            return word.Word?
+                .Select(ch => char.ToLower(ch))
+                .Where(ch => char.IsLetterOrDigit(ch))
+                .Select(ch => $"{ch}")
+                .DefaultIfEmpty("")
+                .Aggregate((x, y) => x + y);
+        }
+
+        public static DateTime? StartTime(this List<Word> words)
+        { 
+            return words.Any() ? words[0].StartTime : null;
+        }
+
+        public static DateTime? EndTime(this List<Word> words)
+        {
+            return words.Any() ? words[^1].EndTime : null;
+        }
+
         public static void TrimStartAt(this List<Word> words, DateTime targetTime)
         {
             for (int i = 0; i < words.Count; i++)
             {
-                if (targetTime <= words[i].StartTimeUtc)
+                if (targetTime <= words[i].StartTime)
                 {
                     words.RemoveRange(0, i);
                     return;
                 }
-                else if (targetTime <= words[i].EndTimeUtc)
+                else if (targetTime <= words[i].EndTime)
                 {
-                    if ((targetTime - words[i].StartTimeUtc).Duration() < (targetTime - words[i].EndTimeUtc).Duration())
+                    if ((targetTime - words[i].StartTime).Duration() < (targetTime - words[i].EndTime).Duration())
                     {
                         words.RemoveRange(0, i);
                     }
@@ -27,18 +47,32 @@
             words.Clear(); // empty list
         }
 
-        public static void TrimEndAt(this List<Word> words, DateTime targetTime)
+        public static void TrimEndAt(this List<Word> words, DateTime targetTime, string? anchorToken = null)
         {
             for (int i = 0; i < words.Count; i++)
             {
-                if (targetTime <= words[i].StartTimeUtc)
+                if (targetTime <= words[i].StartTime)
                 {
                     words.RemoveRange(i, words.Count - i);
                     return;
                 }
-                else if (targetTime <= words[i].EndTimeUtc)
+                else if (targetTime <= words[i].EndTime)
                 {
-                    if ((targetTime - words[i].StartTimeUtc).Duration() < (targetTime - words[i].EndTimeUtc).Duration())
+                    if (anchorToken != null)
+                    {
+                        // try to find the "anchor" token
+                        if (words[i].Token() == anchorToken)
+                        {
+                            words.RemoveRange(i, words.Count - i);
+                            return;
+                        }
+                        else if (i + 1 < words.Count && words[i + 1].Token() == anchorToken)
+                        {
+                            words.RemoveRange(i + 1, words.Count - (i + 1));
+                            return;
+                        }
+                    }
+                    if ((targetTime - words[i].StartTime).Duration() < (targetTime - words[i].EndTime).Duration())
                     {
                         words.RemoveRange(i, words.Count - i);
                     }
@@ -58,14 +92,14 @@
             = new();
         private readonly TimeSpan trimLen;
 
-        private DateTime? endTime;
+        private DateTime? textBufferEndTime;
 
         public TextBuffer(TimeSpan trimLen)
         {
             this.trimLen = trimLen;
         }
 
-        public void AddWords(List<Word> words, DateTime bufferStartTime, DateTime bufferEndTime)
+        public void AddWords(List<Word> words, DateTime wordsStartTime, DateTime wordsEndTime)
         {
             Console.WriteLine("textBuffer:");
             DebugOut(buffer);
@@ -73,19 +107,19 @@
             DebugOut(words);
             Console.WriteLine("--");
 
-            if (endTime == null || bufferStartTime > endTime) // text buffer is empty or there is no overlap
+            if (textBufferEndTime == null || wordsStartTime > textBufferEndTime) // text buffer is empty or there is no overlap
             {
                 buffer.AddRange(words);
             }
             else // text buffer is not empty and there is overlap
             {
                 // check if there is enough overlap for trimming (we need at least 2 x trimLen)
-                if (endTime - bufferStartTime >= 2 * trimLen)
+                if (textBufferEndTime - wordsStartTime >= 2 * trimLen)
                 {
-                    words.TrimStartAt(bufferStartTime + trimLen);
+                    words.TrimStartAt(wordsStartTime + trimLen);
                     if (words.Any())
                     {
-                        buffer.TrimEndAt(bufferStartTime + trimLen);
+                        buffer.TrimEndAt(wordsStartTime + trimLen, words.First().Token());
                         buffer.AddRange(words);
                     }
                 }
@@ -94,13 +128,13 @@
                     words.RemoveAt(0);
                     if (words.Any())
                     {
-                        buffer.TrimEndAt(words.First().StartTimeUtc);
+                        buffer.TrimEndAt(words.First().StartTime, words.First().Token());
                         buffer.AddRange(words);
                     }
                 }
             }
             // update buffer end time
-            endTime = bufferEndTime; 
+            textBufferEndTime = wordsEndTime; 
         }
 
         public void Print()
@@ -116,7 +150,7 @@
         {
             foreach (var word in words)
             {
-                Console.Write($"<{word.StartTimeUtc:mm.ss.fff} {word.Word}({word.Probability}) {word.EndTimeUtc:mm.ss.fff}> ");
+                Console.Write($"<{word.StartTime:mm.ss.fff} {word.Word}({word.Probability}) {word.EndTime:mm.ss.fff}> ");
             }
             Console.WriteLine();    
         }

@@ -22,16 +22,20 @@ namespace OddbitAi.AudioRecorder
             WaveFormat = new WaveFormat(8000, 16, 1)
         };
         private AudioBuffer? buffer;
-        private bool closing = false;
+        private bool closing 
+            = false;
         private readonly TimeSpan snapshotTimeStep
             = TimeSpan.FromSeconds(/*N=*/2); // make a snapshot every N seconds
         private readonly TextBuffer textBuffer
-            = new TextBuffer(TimeSpan.FromSeconds(/*N=*/3)); // overlap for stitching text snippets
+            = new(TimeSpan.FromSeconds(/*N=*/3)); // overlap for stitching text snippets
         private DateTime? lastSnapshotTimestamp
             = null;
         private WhisperService.WhisperServiceClient? whisperClient;
-        private string? outputFolder;
-        private Task? whisperCallTask = null;
+        //private string? outputFolder;
+        private Task? whisperCallTask 
+            = null;
+        private const double noSpeechProbThresh 
+            = 0.5;
 
         public AudioRecorderMainForm()
         {
@@ -62,7 +66,7 @@ namespace OddbitAi.AudioRecorder
                     var words = new List<Word>();
                     foreach (var seg in textObj?.Segments ?? Array.Empty<SegmentDto>())
                     {
-                        if (seg.NoSpeechProb < 0.3) // WARNME: hardcoded
+                        if (seg.NoSpeechProb < noSpeechProbThresh) 
                         {
                             foreach (var word in seg.Words ?? Array.Empty<WordDto>())
                             {
@@ -71,30 +75,18 @@ namespace OddbitAi.AudioRecorder
                                     Word = word.Word,
                                     Probability = word.Probability,
                                     SegmentId = seg.Id,
-                                    StartTimeUtc = bufferStartTime + TimeSpan.FromSeconds(word.Start),
-                                    EndTimeUtc = bufferStartTime + TimeSpan.FromSeconds(word.End)
+                                    StartTime = bufferStartTime + TimeSpan.FromSeconds(word.Start),
+                                    EndTime = bufferStartTime + TimeSpan.FromSeconds(word.End)
                                 });
                             }
                         }
                     }
-                    if (words.Count > 0)
+                    if (words.Any())
                     {
-                        textBuffer.AddWords(words, bufferStartTime, bufferEndTime);
+                        textBuffer.AddWords(words, /*bufferStartTime, bufferEndTime*/ words.StartTime()!.Value, words.EndTime()!.Value);
                         textBuffer.Print();
                         Console.WriteLine("--");
                     }
-
-                    //foreach (var seg in textObj?.Segments ?? Array.Empty<SegmentDto>())
-                    //{
-                    //    if (seg.NoSpeechProb < 0.3) // WARNME: hardcoded
-                    //    {
-                    //        foreach (var word in seg.Words ?? Array.Empty<WordDto>())
-                    //        {
-                    //            Console.Write(word.Word);
-                    //        }
-                    //    }
-                    //}
-                    //Console.WriteLine();
                 }
                 catch (Exception ex)
                 {
