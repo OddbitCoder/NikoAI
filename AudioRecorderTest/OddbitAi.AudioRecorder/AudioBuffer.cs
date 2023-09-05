@@ -23,7 +23,7 @@ namespace OddbitAi.AudioRecorder
         public int RawByteCount
             => rawData.Count;
         public DateTime? StartTime
-            => rawData.Count > 0 ? rawData.First().EndTime : null;
+            => rawData.Count > 0 ? rawData.First().EndTime - TimeSpan.FromSeconds(1d / bytesPerSecond) : null;
         public DateTime? EndTime
             => endTime;
         public string SnapshotId
