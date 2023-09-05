@@ -6,10 +6,6 @@ using NAudio.Wave;
 using OddbitAi.Whisper;
 using OddbitAi.Whisper.Dto;
 
-// Refs
-// https://stackoverflow.com/questions/11500222/how-to-write-naudio-wavestream-to-a-memory-stream
-// https://stackoverflow.com/questions/9804519/waveinevent-sample-event-frequency
-
 namespace OddbitAi.AudioRecorder
 {
     public partial class AudioRecorderMainForm : Form
@@ -29,11 +25,13 @@ namespace OddbitAi.AudioRecorder
         private bool closing = false;
         private readonly TimeSpan snapshotTimeStep
             = TimeSpan.FromSeconds(/*N=*/2); // make a snapshot every N seconds
+        private readonly TextBuffer textBuffer
+            = new TextBuffer(TimeSpan.FromSeconds(/*N=*/3)); // overlap for stitching text snippets
         private DateTime? lastSnapshotTimestamp
             = null;
         private WhisperService.WhisperServiceClient? whisperClient;
         private string? outputFolder;
-        Task? whisperCallTask = null;
+        private Task? whisperCallTask = null;
 
         public AudioRecorderMainForm()
         {
@@ -42,34 +40,61 @@ namespace OddbitAi.AudioRecorder
 
         private void AudioRecorderMainForm_Load(object sender, EventArgs e)
         {
-            buffer = new(16000 * /*N=*/10, waveIn.WaveFormat); // buffer size N seconds
+            buffer = new(16000 * /*N=*/8, waveIn.WaveFormat); // buffer size N seconds
 
             var channel = new Channel("127.0.0.1", 9010, ChannelCredentials.Insecure);
             whisperClient = new WhisperService.WhisperServiceClient(channel);
 
-            outputFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "NAudio");
-            Directory.CreateDirectory(outputFolder);
+            //outputFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "NAudio");
+            //Directory.CreateDirectory(outputFolder);
 
             void whisperCall()
             {
                 try
                 {
                     var bytes = buffer.GetWavBytes(waveIn.WaveFormat);
+                    DateTime bufferStartTime = buffer.StartTime ?? DateTime.MinValue;
+                    DateTime bufferEndTime = buffer.EndTime ?? DateTime.MinValue;
                     var reply = whisperClient.ProcessAudio(new ProcessAudioRequest { AudioData = ByteString.CopyFrom(bytes) });
                     //Console.WriteLine(reply.Text);
                     //buffer.WriteToFile(Path.Combine(outputFolder, buffer.SnapshotId + ".wav"), waveIn.WaveFormat);
                     var textObj = JsonSerializer.Deserialize<TextDto>(reply.Text, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    var words = new List<Word>();
                     foreach (var seg in textObj?.Segments ?? Array.Empty<SegmentDto>())
                     {
-                        if (seg.NoSpeechProb < 0.3) // WARNME
+                        if (seg.NoSpeechProb < 0.3) // WARNME: hardcoded
                         {
                             foreach (var word in seg.Words ?? Array.Empty<WordDto>())
                             {
-                                Console.Write(word.Word);
+                                words.Add(new Word
+                                {
+                                    Word = word.Word,
+                                    Probability = word.Probability,
+                                    SegmentId = seg.Id,
+                                    StartTimeUtc = bufferStartTime + TimeSpan.FromSeconds(word.Start),
+                                    EndTimeUtc = bufferStartTime + TimeSpan.FromSeconds(word.End)
+                                });
                             }
                         }
                     }
-                    Console.WriteLine();
+                    if (words.Count > 0)
+                    {
+                        textBuffer.AddWords(words, bufferStartTime, bufferEndTime);
+                        textBuffer.Print();
+                        Console.WriteLine("--");
+                    }
+
+                    //foreach (var seg in textObj?.Segments ?? Array.Empty<SegmentDto>())
+                    //{
+                    //    if (seg.NoSpeechProb < 0.3) // WARNME: hardcoded
+                    //    {
+                    //        foreach (var word in seg.Words ?? Array.Empty<WordDto>())
+                    //        {
+                    //            Console.Write(word.Word);
+                    //        }
+                    //    }
+                    //}
+                    //Console.WriteLine();
                 }
                 catch (Exception ex)
                 {

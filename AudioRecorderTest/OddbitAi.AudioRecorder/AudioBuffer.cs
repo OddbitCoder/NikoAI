@@ -4,30 +4,35 @@ namespace OddbitAi.AudioRecorder
 {
     internal class AudioBuffer
     {
+        private class QueueItem
+        {
+            public byte DataByte { get; set; }
+            public DateTime EndTime { get; set; }
+        }
+
         private readonly int bufferSize; // in bytes
-        private DateTime? startTimestamp
-            = null;
-        private DateTime? endTimestamp 
+        private DateTime? endTime 
             = null;
         private readonly int bytesPerSecond;
 
-        private readonly Queue<byte> rawData
+        private readonly Queue<QueueItem> rawData
             = new();
 
         public byte[] RawData 
-            => rawData.ToArray();
+            => rawData.Select(x => x.DataByte).ToArray();
         public int RawByteCount
             => rawData.Count;
-        public DateTime? StartTimestampUtc
-            => startTimestamp;
-        public DateTime? EndTimestampUtc
-            => endTimestamp;
+        public DateTime? StartTime
+            => rawData.Count > 0 ? rawData.First().EndTime : null;
+        public DateTime? EndTime
+            => endTime;
         public string SnapshotId
-            => string.Format($"{StartTimestampUtc:yyyyMMddHHmmss.fff}-{EndTimestampUtc:yyyyMMddHHmmss.fff}");
+            => string.Format($"{StartTime:yyyyMMddHHmmss.fff}-{EndTime:yyyyMMddHHmmss.fff}");
 
         public void Clear()
         {
             rawData.Clear();
+            endTime = null;
         }
 
         public AudioBuffer(int bufferSize, WaveFormat wavInFmt)
@@ -38,17 +43,18 @@ namespace OddbitAi.AudioRecorder
 
         public void WriteData(byte[] buffer, int bufferLen)
         {
-            endTimestamp = DateTime.UtcNow;
+            endTime = DateTime.UtcNow;
             for (int i = 0; i < bufferLen; i++) 
             {
-                rawData.Enqueue(buffer[i]);
+                rawData.Enqueue(new QueueItem {
+                    DataByte = buffer[i],
+                    EndTime = endTime.Value - TimeSpan.FromSeconds((double)(bufferLen - i) / bytesPerSecond)
+                });
                 while (rawData.Count > bufferSize) 
                 {
                     rawData.Dequeue();
                 }
             }
-            double seconds = (double)rawData.Count / bytesPerSecond;
-            startTimestamp = endTimestamp - TimeSpan.FromSeconds(seconds);
         }
 
         public void WriteToFile(string fileName, WaveFormat wavFormat)
