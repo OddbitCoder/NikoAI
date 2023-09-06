@@ -34,8 +34,8 @@ namespace OddbitAi.AudioRecorder
         //private string? outputFolder;
         private Task? whisperCallTask 
             = null;
-        private const double noSpeechProbThresh 
-            = 0.5;
+        private const double noSpeechProbThresh
+            = 0.3;
 
         public AudioRecorderMainForm()
         {
@@ -57,10 +57,9 @@ namespace OddbitAi.AudioRecorder
                 try
                 {
                     var bytes = buffer.GetWavBytes(waveIn.WaveFormat);
-                    DateTime bufferStartTime = buffer.StartTime ?? DateTime.MinValue;
-                    DateTime bufferEndTime = buffer.EndTime ?? DateTime.MinValue;
+                    DateTime bufferStartTime = buffer.StartTime!.Value;
+                    DateTime bufferEndTime = buffer.EndTime!.Value;
                     var reply = whisperClient.ProcessAudio(new ProcessAudioRequest { AudioData = ByteString.CopyFrom(bytes) });
-                    //Console.WriteLine(reply.Text);
                     //buffer.WriteToFile(Path.Combine(outputFolder, buffer.SnapshotId + ".wav"), waveIn.WaveFormat);
                     var textObj = JsonSerializer.Deserialize<TextDto>(reply.Text, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                     var words = new List<Word>();
@@ -84,6 +83,7 @@ namespace OddbitAi.AudioRecorder
                     if (words.Any())
                     {
                         textBuffer.AddWords(words, /*bufferStartTime, bufferEndTime*/ words.StartTime()!.Value, words.EndTime()!.Value);
+                        Console.WriteLine(reply.Text);
                         textBuffer.Print();
                         Console.WriteLine("--");
                     }

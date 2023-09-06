@@ -40,7 +40,7 @@ else:
 
 print("Loading the model...");
 
-model_name = "medium" # 'tiny.en', 'tiny', 'base.en', 'base', 'small.en', 'small', 'medium.en', 'medium', 'large-v1', 'large-v2', 'large'
+model_name = "small" # 'tiny.en', 'tiny', 'base.en', 'base', 'small.en', 'small', 'medium.en', 'medium', 'large-v1', 'large-v2', 'large'
 model = whisper.load_model(model_name)#.to(device) # the last part is done in load_model
 
 print("Done.")
@@ -49,7 +49,7 @@ print("Done.")
 
 print("Starting the service...")
 
-lang=None # en, sl
+lang="en"
 
 class Service(contracts_pb2_grpc.WhisperServiceServicer):
     def ProcessAudio(self, request, context): 
