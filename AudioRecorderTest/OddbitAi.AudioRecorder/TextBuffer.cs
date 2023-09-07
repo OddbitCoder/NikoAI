@@ -30,12 +30,13 @@
             return matchIdxList;
         }
 
-        public static List<int> FindOverlappingWordsNoTokenCheck(this Word word, List<Word> wordList)
+        // finds all words in 'wordList' that overlap with 'word' (token is not checked)
+        public static List<int> FindOverlappingWordsNoTokenCheck(this Word word, List<Word> wordList, int threshMs)
         {
             var matchIdxList = new List<int>();
             for (int i = 0; i < wordList.Count; i++)
             {
-                if ((word.EndTime - wordList[i].EndTime).Duration().TotalMilliseconds < 500) // WARNME: hardcoded threshold
+                if ((word.EndTime - wordList[i].EndTime).Duration().TotalMilliseconds < threshMs) 
                 {
                     matchIdxList.Add(i);
                 }
@@ -43,7 +44,7 @@
             return matchIdxList;
         }
 
-        private static void FindValidSequencesRecurs(List<int> list, List<List<int>> seqData, int seqItemIdx, List<List<int>> seqs, int idxLimit)
+        private static void GetValidSequencesRecurs(List<int> list, List<List<int>> seqData, int seqItemIdx, List<List<int>> seqs, int idxLimit)
         {
             foreach (var idx in seqData[seqItemIdx].Where(x => x > idxLimit).DefaultIfEmpty(-1))
             {
@@ -54,26 +55,17 @@
                 }
                 else
                 {
-                    FindValidSequencesRecurs(list, seqData, seqItemIdx + 1, seqs, idx);
+                    GetValidSequencesRecurs(list, seqData, seqItemIdx + 1, seqs, idx);
                 }
                 list.RemoveAt(list.Count - 1);
             }
         }
 
-        public static void StitchWords(this List<Word> text, List<Word> words)
-        {
-            foreach (var word in words)
-            {
-                double minDiff = text.Select(x => (x.EndTime - word.EndTime).Duration().TotalMilliseconds).Min();
-                Console.WriteLine($"{word} {minDiff}");
-            }
-        }
-
         // creates all valid sequences
-        public static List<List<int>> FindValidSequences(List<List<int>> seqData)
+        public static List<List<int>> GetValidSequences(List<List<int>> seqData)
         {
             var seqs = new List<List<int>>();
-            FindValidSequencesRecurs(new(), seqData, 0, seqs, -1);
+            GetValidSequencesRecurs(new(), seqData, 0, seqs, -1);
             return seqs;
         }
 
@@ -115,63 +107,30 @@
             return null;
         }
 
-        public static DateTime? StartTime(this List<Word> words)
+        public static bool Stitch(this List<Word> wordBuffer, List<Word> words, Func<Word, List<Word>, List<int>> matcher)
         {
-            return words.Any() ? words[0].StartTime : null;
-        }
-
-        public static DateTime? EndTime(this List<Word> words)
-        {
-            return words.Any() ? words[^1].EndTime : null;
-        }
-
-        public static void TrimStartAt(this List<Word> words, DateTime targetTime)
-        {
-            for (int i = 0; i < words.Count; i++)
+            // map each word into list of indices into wordBuffer (possible matches)
+            var seqData = new List<List<int>>();
+            foreach (Word word in words)
             {
-                if (targetTime <= words[i].StartTime)
-                {
-                    words.RemoveRange(0, i);
-                    return;
-                }
-                else if (targetTime <= words[i].EndTime)
-                {
-                    if ((targetTime - words[i].StartTime).Duration() < (targetTime - words[i].EndTime).Duration())
-                    {
-                        words.RemoveRange(0, i);
-                    }
-                    else
-                    {
-                        words.RemoveRange(0, i + 1);
-                    }
-                    return;
-                }
+                seqData.Add(matcher(word, wordBuffer));
             }
-            words.Clear(); // empty list
-        }
 
-        public static void TrimEndAt(this List<Word> words, DateTime targetTime)
-        {
-            for (int i = 0; i < words.Count; i++)
+            // produce all valid sequences
+            var seqs = TextBufferUtils.GetValidSequences(seqData);
+
+            // [try to] find overlap index
+            var overlap = TextBufferUtils.FindOverlapIndex(seqs);
+
+            if (overlap.HasValue) // we found overlap, let's stitch there
             {
-                if (targetTime <= words[i].StartTime)
-                {
-                    words.RemoveRange(i, words.Count - i);
-                    return;
-                }
-                else if (targetTime <= words[i].EndTime)
-                {
-                    if ((targetTime - words[i].StartTime).Duration() < (targetTime - words[i].EndTime).Duration())
-                    {
-                        words.RemoveRange(i, words.Count - i);
-                    }
-                    else if (i + 1 < words.Count)
-                    {
-                        words.RemoveRange(i + 1, words.Count - (i + 1));
-                    }
-                    return;
-                }
+                wordBuffer.RemoveRange(overlap.Value.oldChunkIdx, wordBuffer.Count - overlap.Value.oldChunkIdx);
+                words.RemoveRange(0, overlap.Value.newChunkIdx);
+                wordBuffer.AddRange(words);
+                return true;
             }
+
+            return false;
         }
     }
 
@@ -183,7 +142,7 @@
 
         private DateTime? LastWordEndTime
             => wordBuffer.Any() ? wordBuffer.Last().EndTime : null;
-        private DateTime? audioBufferEndTime;
+        //private DateTime? audioBufferEndTime;
 
         public TextBuffer(TimeSpan trimLen)
         {
@@ -192,137 +151,41 @@
 
         public void AddWords(List<Word> words, DateTime audioBufferStartTime, DateTime audioBufferEndTime)
         {
+            // trim
             words = words.Where(x => !((x.EndTime - audioBufferEndTime).Duration() < trimLen)
                 && !((x.EndTime/*safer!*/ - audioBufferStartTime).Duration() < trimLen)).ToList();
-          
-            if (!words.Any())
+
+            if (words.Any()) // anything left?
             {
-                Console.WriteLine("Buffer empty");
-                this.audioBufferEndTime = audioBufferEndTime;
-                return;
-            }
+                var wordsStartTime = words[0].StartTime;
+                var wordsEndTime = words[^1].EndTime;
 
-            var wordsStartTime = words.StartTime()!.Value;
-            var wordsEndTime = words.EndTime()!.Value;
-
-
-
-            Console.WriteLine("textBuffer:");
-            DebugOut(wordBuffer);
-            Console.WriteLine("words:");
-            DebugOut(words);
-            Console.WriteLine("--");
-
-            // check if the two sequences overlap at all
-
-            if (!wordBuffer.Any() || LastWordEndTime <= wordsStartTime)
-            {
-                Console.WriteLine("The two sequences do not overlap.");
-                wordBuffer.AddRange(words);
-                this.audioBufferEndTime = audioBufferEndTime;
-                return;
-            }
-
-            var seqData = new List<List<int>>();
-            foreach (Word word in words)
-            {
-                seqData.Add(word.FindOverlappingWords(wordBuffer));
-            }
-
-            // produce all possible sequences
-            var seqs = TextBufferUtils.FindValidSequences(seqData);
-
-            foreach (var seq in seqs)
-            {
-                foreach (var item in seq)
+                if (!wordBuffer.Any() || LastWordEndTime <= wordsStartTime) // no overlap? // TODO: different check here?
                 {
-                    Console.Write($"{item} ");
+                    wordBuffer.AddRange(words);
                 }
-                Console.WriteLine();
+                else
+                {
+                    if (!wordBuffer.Stitch(words, (Word word, List<Word> buffer) => TextBufferUtils.FindOverlappingWords(word, buffer)))
+                    {
+                        if (!wordBuffer.Stitch(words, (Word word, List<Word> buffer) => TextBufferUtils.FindOverlappingWordsNoTokenCheck(word, buffer, /*threshMs=*/200)))
+                        {
+                            // none of the heuristics work, do whatever
+                            wordBuffer.Add(new Word
+                            {
+                                Word = " (...)",
+                                StartTime = LastWordEndTime!.Value,
+                                EndTime = LastWordEndTime!.Value,
+                                Probability = 0,
+                                SegmentId = -1
+                            });
+                            wordBuffer.AddRange(words);
+                        }
+                    }
+                }
             }
 
-            // find overlap
-            var overlap = TextBufferUtils.FindOverlapIndex(seqs);
-            
-            if (overlap.HasValue) // we found overlap, let's stitch there
-            {
-                wordBuffer.RemoveRange(overlap.Value.oldChunkIdx, wordBuffer.Count - overlap.Value.oldChunkIdx);
-                words.RemoveRange(0, overlap.Value.newChunkIdx);
-                wordBuffer.AddRange(words);
-                this.audioBufferEndTime = audioBufferEndTime;
-                return;
-            }
-
-            Console.WriteLine("OVERLAP NOT FOUND!");
-
-
-            
-            var seqData2 = new List<List<int>>();
-            foreach (Word word in words)
-            {
-                seqData2.Add(word.FindOverlappingWordsNoTokenCheck(wordBuffer));
-            }
-            Console.WriteLine("seqData2.count " + seqData2.Count);
-            var seqs2 = TextBufferUtils.FindValidSequences(seqData2);
-            var overlap2 = TextBufferUtils.FindOverlapIndex(seqs2);
-            if (overlap2.HasValue) // we found overlap, let's stitch there
-            {
-                Console.WriteLine("FOUND OVERLAP ON END-MATCHING HEURISTICS");
-                wordBuffer.RemoveRange(overlap2.Value.oldChunkIdx, wordBuffer.Count - overlap2.Value.oldChunkIdx);
-                words.RemoveRange(0, overlap2.Value.newChunkIdx);
-                wordBuffer.AddRange(words);
-                this.audioBufferEndTime = audioBufferEndTime;
-                return;
-            }
-
-            // do something silly, since you don't know what to do
-
-            wordBuffer.Add(new Word
-            {
-                Word = " (...)",
-                StartTime = LastWordEndTime!.Value,
-                EndTime = LastWordEndTime!.Value,
-                Probability = 0,
-                SegmentId = -1
-            });
-            wordBuffer.AddRange(words);
-            this.audioBufferEndTime = audioBufferEndTime;
-            return;
-
-
-
-
-            // else do whatever
-
-            //Console.WriteLine("--");
-            //if (lastWordEndTime == null || audioBufferStartTime > lastWordEndTime) // text buffer is empty or there is no overlap
-            //{
-            //    wordBuffer.AddRange(words);
-            //}
-            //else // text buffer is not empty and there is overlap
-            //{
-            //    // check if there is enough overlap for trimming (we need at least 2 x trimLen)
-            //    if (lastWordEndTime - audioBufferStartTime >= 2 * trimLen)
-            //    {
-            //        words.TrimStartAt(audioBufferStartTime + trimLen);
-            //        if (words.Any())
-            //        {
-            //            wordBuffer.TrimEndAt(audioBufferStartTime + trimLen, words.First().Token());
-            //            wordBuffer.AddRange(words);
-            //        }
-            //    }
-            //    else // not enough overlap
-            //    {
-            //        words.RemoveAt(0);
-            //        if (words.Any())
-            //        {
-            //            wordBuffer.TrimEndAt(words.First().StartTime, words.First().Token());
-            //            wordBuffer.AddRange(words);
-            //        }
-            //    }
-            //}
-            //// update buffer end time
-            //lastWordEndTime = audioBufferEndTime; 
+            //this.audioBufferEndTime = audioBufferEndTime;
         }
 
         public void Print()
@@ -332,15 +195,6 @@
                 Console.Write(word.Word);
             }
             Console.WriteLine();
-        }
-
-        private static void DebugOut(List<Word> words)
-        {
-            foreach (var word in words)
-            {
-                Console.Write($"<{word.StartTime:mm.ss.fff} {word.Word}({word.Probability}) {word.EndTime:mm.ss.fff}> ");
-            }
-            Console.WriteLine();    
         }
     }
 }

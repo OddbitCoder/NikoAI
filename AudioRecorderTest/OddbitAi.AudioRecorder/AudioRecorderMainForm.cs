@@ -27,7 +27,7 @@ namespace OddbitAi.AudioRecorder
         private readonly TimeSpan snapshotTimeStep
             = TimeSpan.FromSeconds(/*N=*/2); // make a snapshot every N seconds
         private readonly TextBuffer textBuffer
-            = new(TimeSpan.FromSeconds(/*N=*/1)); // trim audio buffer N seconds each side
+            = new(TimeSpan.FromSeconds(/*N=*/1)); // trim audio buffer N seconds on each side
         private DateTime? lastSnapshotTimestamp
             = null;
         private WhisperService.WhisperServiceClient? whisperClient;
