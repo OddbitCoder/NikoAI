@@ -27,7 +27,7 @@ namespace OddbitAi.AudioRecorder
         private readonly TimeSpan snapshotTimeStep
             = TimeSpan.FromSeconds(/*N=*/2); // make a snapshot every N seconds
         private readonly TextBuffer textBuffer
-            = new(TimeSpan.FromSeconds(/*N=*/3)); // overlap for stitching text snippets
+            = new(TimeSpan.FromSeconds(/*N=*/1)); // trim audio buffer N seconds each side
         private DateTime? lastSnapshotTimestamp
             = null;
         private WhisperService.WhisperServiceClient? whisperClient;
@@ -82,7 +82,7 @@ namespace OddbitAi.AudioRecorder
                     }
                     if (words.Any())
                     {
-                        textBuffer.AddWords(words, /*bufferStartTime, bufferEndTime*/ words.StartTime()!.Value, words.EndTime()!.Value);
+                        textBuffer.AddWords(words, bufferStartTime, bufferEndTime);
                         Console.WriteLine(reply.Text);
                         textBuffer.Print();
                         Console.WriteLine("--");
