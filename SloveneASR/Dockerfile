@@ -14,4 +14,6 @@ COPY . /opt/asr
 RUN python3 -m pip install -r /opt/asr/requirements.txt
 WORKDIR /opt/asr
 
-ENTRYPOINT [ "python3", "server.py" ]
+#ENTRYPOINT [ "python3", "server.py" ]
+ENTRYPOINT ["tail"]
+CMD ["-f","/dev/null"]
