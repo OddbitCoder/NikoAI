@@ -27,6 +27,14 @@ from concurrent import futures
 
 import json
 
+import signal
+
+
+def handler(signum, frame):
+    exit(1)
+
+signal.signal(signal.SIGINT, handler)
+
 
 if torch.cuda.is_available() and hasattr(torch.cuda, 'amp') and hasattr(torch.cuda.amp, 'autocast'):
     logging.info("AMP enabled!\n")
