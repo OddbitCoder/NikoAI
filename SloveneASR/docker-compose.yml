@@ -4,10 +4,13 @@ services:
     image: rsdo/ds2/nemo-asr:latest
     build: .
     ports:
-      - 8000:8000
+      - 9010:9010
     volumes:
-      - type: bind
-        source: ./models/v2.0
-        target: /opt/asr/models/v2.0
-        read_only: true
-
+      - ./models/v2.0:/opt/asr/models/v2.0:ro
+      - ./files:/files
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities:
+              - gpu

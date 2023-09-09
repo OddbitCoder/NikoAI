@@ -14,6 +14,14 @@ COPY . /opt/asr
 RUN python3 -m pip install -r /opt/asr/requirements.txt
 WORKDIR /opt/asr
 
-#ENTRYPOINT [ "python3", "server.py" ]
+RUN pip install grpcio
+RUN pip install grpcio-tools
+
+# WARNME: this fixes some ver issues (is there a better way?)
+
+RUN pip install pydantic==1.*
+RUN pip install protobuf==3.20.*
+
+#ENTRYPOINT [ "python3", "/files/server.py", "9010" ]
 ENTRYPOINT ["tail"]
 CMD ["-f","/dev/null"]
