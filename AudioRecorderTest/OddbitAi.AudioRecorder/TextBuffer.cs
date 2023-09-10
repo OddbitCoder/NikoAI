@@ -2,13 +2,15 @@
 {
     internal class TextBuffer
     {
-        private readonly List<Word> wordBuffer
+        private readonly List<Word> text
             = new();
-        private readonly TimeSpan trimLen; 
+        private readonly TimeSpan trimLen;
+        //private DateTime? audioBufferEndTime;
 
         private DateTime? LastWordEndTime
-            => wordBuffer.Any() ? wordBuffer.Last().EndTime : null;
-        //private DateTime? audioBufferEndTime;
+            => text.Any() ? text.Last().EndTime : null;
+        private int LastWordSegmentId
+            => text.Any() ? text.Last().SegmentId : 0;
 
         private static string? Normalize(Word word)
         {
@@ -20,15 +22,15 @@
                 .Aggregate((x, y) => x + y);
         }
 
-        // finds all words in 'snippet' that overlap with 'word' and have the same normalized form
-        private static List<int> FindOverlappingWords(Word word, List<Word> snippet)
+        // finds all words in 'text' that overlap with 'word' and have the same normalized form
+        private static List<int> FindOverlappingWords(Word word, List<Word> text)
         {
             var matches = new List<int>();
-            for (int i = 0; i < snippet.Count; i++)
+            for (int i = 0; i < text.Count; i++)
             {
-                if (Normalize(word) == Normalize(snippet[i]))
+                if (Normalize(word) == Normalize(text[i]))
                 {
-                    if (word.StartTime < snippet[i].EndTime && word.EndTime > snippet[i].StartTime)
+                    if (word.StartTime < text[i].EndTime && word.EndTime > text[i].StartTime)
                     {
                         matches.Add(i);
                     }
@@ -37,26 +39,13 @@
             return matches;
         }
 
-        private static List<int> FindOverlappingWordsTextOnly(Word word, List<Word> snippet)
+        // finds all words in 'text' that overlap with 'word' (ignores content)
+        public static List<int> FindOverlappingWordsNoTokenCheck(Word word, List<Word> text, TimeSpan thresh) 
         {
             var matches = new List<int>();
-            for (int i = 0; i < snippet.Count; i++)
+            for (int i = 0; i < text.Count; i++)
             {
-                if (Normalize(word) == Normalize(snippet[i]))
-                {
-                    matches.Add(i);
-                }
-            }
-            return matches;
-        }
-
-        // finds all words in 'snippet' that overlap with 'word' (ignores content)
-        public static List<int> FindOverlappingWordsNoTokenCheck(Word word, List<Word> snippet, TimeSpan thresh) 
-        {
-            var matches = new List<int>();
-            for (int i = 0; i < snippet.Count; i++)
-            {
-                if ((word.EndTime - snippet[i].EndTime).Duration() < thresh)
+                if ((word.EndTime - text[i].EndTime).Duration() < thresh)
                 {
                     matches.Add(i);
                 }
@@ -89,7 +78,7 @@
             return seqs;
         }
 
-        private static (int oldChunkIdx, int newChunkIdx)? FindOverlapIndex(List<List<int>> seqs)
+        private static (int textIdx, int snippetIdx)? FindOverlapIndex(List<List<int>> seqs)
         {
             // look for seq of length 3
             foreach (var seq in seqs)
@@ -127,13 +116,13 @@
             return null;
         }
 
-        private static bool Append(List<Word> wordBuffer, List<Word> words, Func<Word, List<Word>, List<int>> matcher)
+        private static bool Append(List<Word> text, List<Word> snippet, Func<Word, List<Word>, List<int>> matcher)
         {
             // map each word into list of indices into wordBuffer (possible matches)
             var seqData = new List<List<int>>();
-            foreach (Word word in words)
+            foreach (Word word in snippet)
             {
-                seqData.Add(matcher(word, wordBuffer));
+                seqData.Add(matcher(word, text));
             }
 
             // produce all valid sequences
@@ -144,9 +133,12 @@
 
             if (overlap.HasValue) // we found overlap, let's stitch there
             {
-                wordBuffer.RemoveRange(overlap.Value.oldChunkIdx, wordBuffer.Count - overlap.Value.oldChunkIdx);
-                words.RemoveRange(0, overlap.Value.newChunkIdx);
-                wordBuffer.AddRange(words);
+                int idOfs = text[overlap.Value.textIdx].SegmentId - snippet[overlap.Value.snippetIdx].SegmentId;
+                foreach (var item in snippet) { item.SegmentId += idOfs; }
+
+                text.RemoveRange(overlap.Value.textIdx, text.Count - overlap.Value.textIdx);
+                snippet.RemoveRange(0, overlap.Value.snippetIdx);
+                text.AddRange(snippet);
                 return true;
             }
 
@@ -158,37 +150,41 @@
             this.trimLen = trimLen;
         }
 
-        public void AddWords(List<Word> words, DateTime audioBufferStartTime, DateTime audioBufferEndTime)
+        public void AddWords(List<Word> snippet, DateTime audioBufferStartTime, DateTime audioBufferEndTime)
         {
             // trim
-            words = words.Where(x => !((x.EndTime - audioBufferEndTime).Duration() < trimLen)
+            snippet = snippet.Where(x => !((x.EndTime - audioBufferEndTime).Duration() < trimLen)
                 && !((x.EndTime/*safer!*/ - audioBufferStartTime).Duration() < trimLen)).ToList();
 
-            if (words.Any()) // anything left?
+            if (snippet.Any()) // anything left?
             {
-                var wordsStartTime = words[0].StartTime;
-                var wordsEndTime = words[^1].EndTime;
+                var snippetStartTime = snippet[0].StartTime;
+                var snippetEndTime = snippet[^1].EndTime;
 
-                if (!wordBuffer.Any() || LastWordEndTime <= wordsStartTime) // no overlap? // TODO: different condition here?
+                if (!text.Any() || LastWordEndTime <= snippetStartTime) // no overlap? // TODO: different condition here?
                 {
-                    wordBuffer.AddRange(words);
+                    int idOfs = LastWordSegmentId - snippet[0].SegmentId + 1;
+                    foreach (var item in snippet) { item.SegmentId += idOfs; }
+                    text.AddRange(snippet);
                 }
                 else
                 {
-                    if (!Append(wordBuffer, words, (Word word, List<Word> buffer) => FindOverlappingWordsTextOnly(word, buffer)))
+                    if (!Append(text, snippet, (Word word, List<Word> text) => FindOverlappingWords(word, text)))
                     {
-                        if (!Append(wordBuffer, words, (Word word, List<Word> buffer) => FindOverlappingWordsNoTokenCheck(word, buffer, TimeSpan.FromMilliseconds(200)))) // WARNME: hardcoded threshold
+                        if (!Append(text, snippet, (Word word, List<Word> text) => FindOverlappingWordsNoTokenCheck(word, text, TimeSpan.FromMilliseconds(200)))) // WARNME: hardcoded threshold
                         {
-                            // none of the heuristics work, do whatever
-                            wordBuffer.Add(new Word
+                             // none of the heuristics work, do whatever
+                            text.Add(new Word
                             {
                                 String = " (...)",
                                 StartTime = LastWordEndTime!.Value,
                                 EndTime = LastWordEndTime!.Value,
                                 Probability = 0,
-                                SegmentId = -1
+                                SegmentId = LastWordSegmentId + 1
                             });
-                            wordBuffer.AddRange(words);
+                            int idOfs = LastWordSegmentId - snippet[0].SegmentId + 1;
+                            foreach (var item in snippet) { item.SegmentId += idOfs; }
+                            text.AddRange(snippet);
                         }
                     }
                 }
@@ -199,9 +195,9 @@
 
         public void Print()
         { 
-            foreach (var word in wordBuffer)
+            foreach (var word in text)
             {
-                Console.Write(word.String);
+                Console.Write(word.String + "/" + word.SegmentId);
             }
             Console.WriteLine();
         }

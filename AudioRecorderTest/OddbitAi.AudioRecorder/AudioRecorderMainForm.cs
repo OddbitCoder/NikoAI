@@ -49,7 +49,7 @@ namespace OddbitAi.AudioRecorder
 
         private void AudioRecorderMainForm_Load(object sender, EventArgs e)
         {
-            buffer = new(/*N=*/16, waveIn.WaveFormat); // buffer size N seconds
+            buffer = new(/*N=*/8, waveIn.WaveFormat); // buffer size N seconds
 
             var channel = new Channel("127.0.0.1", 9010, ChannelCredentials.Insecure);
             whisperClient = new WhisperService.WhisperServiceClient(channel);
@@ -65,14 +65,13 @@ namespace OddbitAi.AudioRecorder
                     DateTime bufferStartTime = buffer.StartTime!.Value;
                     DateTime bufferEndTime = buffer.EndTime!.Value;
                     var reply = whisperClient.ProcessAudio(new ProcessAudioRequest { AudioData = ByteString.CopyFrom(bytes) });
-                    //Console.WriteLine(reply.Text);
                     //buffer.WriteToFile(Path.Combine(outputFolder, buffer.SnapshotId + ".wav"), waveIn.WaveFormat);
                     var textObj = JsonSerializer.Deserialize<TextDto>(reply.Text, new JsonSerializerOptions { PropertyNameCaseInsensitive = true, Converters = { new JsonStringEnumConverter() } });
                     var words = new List<Word>();
                     if (textObj?.Format == ResponseFormat.NeMo)
                     {
                         // handle NeMo response
-                        Console.WriteLine(textObj?.Text);
+                        Console.WriteLine(textObj.Text);
                         return;
                     }
                     else if (textObj?.Format == ResponseFormat.Exception)
