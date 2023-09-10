@@ -1,5 +1,6 @@
 using System.Runtime.InteropServices;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Google.Protobuf;
 using Grpc.Core;
 using NAudio.Wave;
@@ -14,12 +15,16 @@ namespace OddbitAi.AudioRecorder
         [return: MarshalAs(UnmanagedType.Bool)]
         static extern bool AllocConsole();
 
+        private const int sampleRate = 16000;
+        private const int bitsPerSample = 16;
+        private const int channels = 1;
+
         private readonly WaveInEvent waveIn = new()
         {
             BufferMilliseconds = 250,
             NumberOfBuffers = 2,
             //DeviceNumber = 0,
-            WaveFormat = new WaveFormat(8000, 16, 1)
+            WaveFormat = new WaveFormat(sampleRate, bitsPerSample, channels)
         };
         private AudioBuffer? buffer;
         private bool closing 
@@ -44,7 +49,7 @@ namespace OddbitAi.AudioRecorder
 
         private void AudioRecorderMainForm_Load(object sender, EventArgs e)
         {
-            buffer = new(16000 * /*N=*/8, waveIn.WaveFormat); // buffer size N seconds
+            buffer = new(/*N=*/16, waveIn.WaveFormat); // buffer size N seconds
 
             var channel = new Channel("127.0.0.1", 9010, ChannelCredentials.Insecure);
             whisperClient = new WhisperService.WhisperServiceClient(channel);
@@ -60,18 +65,30 @@ namespace OddbitAi.AudioRecorder
                     DateTime bufferStartTime = buffer.StartTime!.Value;
                     DateTime bufferEndTime = buffer.EndTime!.Value;
                     var reply = whisperClient.ProcessAudio(new ProcessAudioRequest { AudioData = ByteString.CopyFrom(bytes) });
+                    //Console.WriteLine(reply.Text);
                     //buffer.WriteToFile(Path.Combine(outputFolder, buffer.SnapshotId + ".wav"), waveIn.WaveFormat);
-                    var textObj = JsonSerializer.Deserialize<TextDto>(reply.Text, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    var textObj = JsonSerializer.Deserialize<TextDto>(reply.Text, new JsonSerializerOptions { PropertyNameCaseInsensitive = true, Converters = { new JsonStringEnumConverter() } });
                     var words = new List<Word>();
+                    if (textObj?.Format == ResponseFormat.NeMo)
+                    {
+                        // handle NeMo response
+                        Console.WriteLine(textObj?.Text);
+                        return;
+                    }
+                    else if (textObj?.Format == ResponseFormat.Exception)
+                    {
+                        Console.WriteLine(textObj.Text);
+                        return;
+                    }
                     foreach (var seg in textObj?.Segments ?? Array.Empty<SegmentDto>())
                     {
-                        if (seg.NoSpeechProb < noSpeechProbThresh) 
+                        if (seg.NoSpeechProb < noSpeechProbThresh)
                         {
                             foreach (var word in seg.Words ?? Array.Empty<WordDto>())
                             {
                                 words.Add(new Word
                                 {
-                                    Word = word.Word,
+                                    String = word.Word,
                                     Probability = word.Probability,
                                     SegmentId = seg.Id,
                                     StartTime = bufferStartTime + TimeSpan.FromSeconds(word.Start),

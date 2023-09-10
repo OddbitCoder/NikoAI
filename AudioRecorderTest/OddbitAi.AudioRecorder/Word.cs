@@ -1,9 +1,9 @@
-﻿using OddbitAi.Whisper.Dto;
-
-namespace OddbitAi.AudioRecorder
+﻿namespace OddbitAi.AudioRecorder
 {
-    internal class Word : WordDto
+    internal class Word 
     {
+        public string? String { get; set; }
+        public double Probability { get; set; }
         public int SegmentId { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }

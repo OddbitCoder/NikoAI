@@ -35,10 +35,10 @@ namespace OddbitAi.AudioRecorder
             endTime = null;
         }
 
-        public AudioBuffer(int bufferSize, WaveFormat wavInFmt)
+        public AudioBuffer(int bufferSizeSec, WaveFormat wavInFmt)
         {
-            this.bufferSize = bufferSize;
-            this.bytesPerSecond = wavInFmt.SampleRate * wavInFmt.Channels * (wavInFmt.BitsPerSample / 8);
+            bufferSize = (wavInFmt.BitsPerSample / 8) * wavInFmt.SampleRate * bufferSizeSec;
+            bytesPerSecond = wavInFmt.SampleRate * wavInFmt.Channels * (wavInFmt.BitsPerSample / 8);
         }
 
         public void WriteData(byte[] buffer, int bufferLen)
