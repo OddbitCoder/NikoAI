@@ -43,8 +43,8 @@ RUN venv/bin/python3 -m pip install mediapipe svglib fvcore --prefer-binary
 
 # all done
 
-ENTRYPOINT ["/root/sd/webui.sh"]
-CMD ["-f","--listen","--enable-insecure-extension-access","--xformers"]
+#ENTRYPOINT ["/root/sd/webui.sh"]
+#CMD ["-f","--listen","--enable-insecure-extension-access","--xformers"]
 
-#ENTRYPOINT ["tail"]
-#CMD ["-f","/dev/null"]
+ENTRYPOINT ["tail"]
+CMD ["-f","/dev/null"]
