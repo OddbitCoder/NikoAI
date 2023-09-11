@@ -54,8 +54,9 @@ namespace OddbitAi.AudioRecorder
             var channel = new Channel("127.0.0.1", 9010, ChannelCredentials.Insecure);
             whisperClient = new WhisperService.WhisperServiceClient(channel);
 
-            //outputFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "NAudio");
-            //Directory.CreateDirectory(outputFolder);
+            var outputFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "NAudio");
+            Directory.CreateDirectory(outputFolder);
+            var logFileName = Path.Combine(outputFolder, "log.txt");
 
             void whisperCall()
             {
@@ -98,8 +99,17 @@ namespace OddbitAi.AudioRecorder
                     }
                     if (words.Any())
                     {
+                        File.AppendAllText(logFileName, $"AUDIO BUFFER START TIME {buffer.StartTime:HH:mm:ss.fff}\n");
+                        File.AppendAllText(logFileName, $"AUDIO BUFFER END TIME {buffer.EndTime:HH:mm:ss.fff}\n");
+                        File.AppendAllText(logFileName, "\nTEXT BEFORE ");
+                        textBuffer.WriteToFile(logFileName); // before
+                        File.AppendAllText(logFileName, $"\nRAW RESPONSE {reply.Text}\n");
+                        File.AppendAllText(logFileName, "\nSNIPPET ");
+                        textBuffer.WriteToFile(logFileName, words);
                         textBuffer.AddWords(words, bufferStartTime, bufferEndTime);
-                        Console.WriteLine(reply.Text);
+                        File.AppendAllText(logFileName, "\nTEXT AFTER ");
+                        textBuffer.WriteToFile(logFileName); // after
+                        File.AppendAllText(logFileName, "\n--\n\n");
                         textBuffer.Print();
                         Console.WriteLine("--");
                     }

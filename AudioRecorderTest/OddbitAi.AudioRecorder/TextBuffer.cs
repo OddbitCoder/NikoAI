@@ -197,9 +197,22 @@
         { 
             foreach (var word in text)
             {
-                Console.Write(word.String + "/" + word.SegmentId);
+                //Console.Write(word.String + "/" + word.SegmentId);
+                Console.Write(word.String);
             }
             Console.WriteLine();
+        }
+
+        public void WriteToFile(string filename, IEnumerable<Word>? snippet = null)
+        { 
+            using (var sw = new StreamWriter(filename, append: true)) 
+            {
+                foreach (var word in snippet ?? text)
+                {
+                    sw.Write($"<{word.StartTime:ss.fff} {word.String}/{word.SegmentId} {word.EndTime:ss.fff}> ");
+                }
+                sw.WriteLine();
+            }
         }
     }
 }
