@@ -15,4 +15,4 @@ services:
               count: 1
               capabilities: [gpu]
     ports:
-      - "9010:9010"    
+      - "9011:9011"    
