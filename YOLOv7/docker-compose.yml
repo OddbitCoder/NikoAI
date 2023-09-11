@@ -1,0 +1,18 @@
+version: "3.7"
+
+services:
+  yolov7:
+    image: mgrcar/yolov7:0.1
+    build: .
+    volumes:
+      - ./files:/files
+      - ./models:/models
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    ports:
+      - "9010:9010"    
