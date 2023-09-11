@@ -6,7 +6,7 @@ On the host:
     ```
     docker-compose up -d
     ```
-2. "Enter" the container:
+2. Enter the container:
     ```
     docker ps
     docker exec -it <container ID> bash
