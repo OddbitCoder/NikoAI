@@ -6,6 +6,9 @@ using Grpc.Core;
 using NAudio.Wave;
 using OddbitAi.Whisper;
 using OddbitAi.Whisper.Dto;
+using Emgu.CV;
+using Emgu.CV.Structure;
+using System.Drawing;
 
 namespace OddbitAi.AudioRecorder
 {
@@ -14,6 +17,8 @@ namespace OddbitAi.AudioRecorder
         [DllImport("kernel32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         static extern bool AllocConsole();
+
+        // audio
 
         private const int sampleRate = 16000;
         private const int bitsPerSample = 16;
@@ -27,7 +32,7 @@ namespace OddbitAi.AudioRecorder
             WaveFormat = new WaveFormat(sampleRate, bitsPerSample, channels)
         };
         private AudioBuffer? buffer;
-        private bool closing 
+        private bool closing
             = false;
         private readonly TimeSpan snapshotTimeStep
             = TimeSpan.FromSeconds(/*N=*/2); // make a snapshot every N seconds
@@ -37,14 +42,29 @@ namespace OddbitAi.AudioRecorder
             = null;
         private WhisperService.WhisperServiceClient? whisperClient;
         //private string? outputFolder;
-        private Task? whisperCallTask 
+        private Task? whisperCallTask
             = null;
         private const double noSpeechProbThresh
             = 0.3;
 
+        // video
+
+        private VideoCapture capture
+            = new();
+
         public AudioRecorderMainForm()
         {
             InitializeComponent();
+        }
+
+        private void ProcessCamFrame(object? sender, EventArgs e)
+        {
+            var frame = new Mat();
+            capture.Retrieve(frame);
+            if (!frame.IsEmpty)
+            {
+                pbCamCapture.Invoke(() => pbCamCapture.Image = frame.ToBitmap());
+            }
         }
 
         private void AudioRecorderMainForm_Load(object sender, EventArgs e)
@@ -57,6 +77,9 @@ namespace OddbitAi.AudioRecorder
             var outputFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "NAudio");
             Directory.CreateDirectory(outputFolder);
             var logFileName = Path.Combine(outputFolder, "log.txt");
+
+            capture.ImageGrabbed += ProcessCamFrame;
+            capture.Start();
 
             void whisperCall()
             {
@@ -137,17 +160,18 @@ namespace OddbitAi.AudioRecorder
                 await Task.Run(async () =>
                 {
                     buttonStop.Enabled = false;
-                    while (whisperCallTask != null && !whisperCallTask.IsCompleted) 
+                    while (whisperCallTask != null && !whisperCallTask.IsCompleted)
                     {
                         await Task.Delay(25);
                     }
-                    whisperCall(); 
+                    whisperCall();
                     buffer.Clear();
                 });
                 buttonRecord.Enabled = true;
                 if (closing)
                 {
                     waveIn.Dispose();
+                    capture.Dispose();
                 }
             };
 

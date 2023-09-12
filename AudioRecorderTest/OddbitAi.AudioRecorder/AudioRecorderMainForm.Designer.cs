@@ -30,6 +30,8 @@
         {
             buttonRecord = new Button();
             buttonStop = new Button();
+            pbCamCapture = new PictureBox();
+            ((System.ComponentModel.ISupportInitialize)pbCamCapture).BeginInit();
             SuspendLayout();
             // 
             // buttonRecord
@@ -53,23 +55,36 @@
             buttonStop.UseVisualStyleBackColor = true;
             buttonStop.Click += buttonStop_Click;
             // 
+            // pbCamCapture
+            // 
+            pbCamCapture.Location = new Point(309, 111);
+            pbCamCapture.Name = "pbCamCapture";
+            pbCamCapture.Size = new Size(10, 10);
+            pbCamCapture.SizeMode = PictureBoxSizeMode.AutoSize;
+            pbCamCapture.TabIndex = 2;
+            pbCamCapture.TabStop = false;
+            // 
             // AudioRecorderMainForm
             // 
             AutoScaleDimensions = new SizeF(17F, 41F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1759, 862);
+            Controls.Add(pbCamCapture);
             Controls.Add(buttonStop);
             Controls.Add(buttonRecord);
             Name = "AudioRecorderMainForm";
             Text = "Audio Recorder Test";
             FormClosing += AudioRecorderMainForm_FormClosing;
             Load += AudioRecorderMainForm_Load;
+            ((System.ComponentModel.ISupportInitialize)pbCamCapture).EndInit();
             ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
 
         private Button buttonRecord;
         private Button buttonStop;
+        private PictureBox pbCamCapture;
     }
 }
