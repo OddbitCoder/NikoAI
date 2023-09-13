@@ -1,14 +1,15 @@
 using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Drawing.Imaging;
 using Google.Protobuf;
 using Grpc.Core;
 using NAudio.Wave;
 using OddbitAi.Whisper;
 using OddbitAi.Whisper.Dto;
+using OddbitAi.Models;
+using OddbitAi.Models.YoloDto;
 using Emgu.CV;
-using Emgu.CV.Structure;
-using System.Drawing;
 
 namespace OddbitAi.AudioRecorder
 {
@@ -36,20 +37,27 @@ namespace OddbitAi.AudioRecorder
             = false;
         private readonly TimeSpan snapshotTimeStep
             = TimeSpan.FromSeconds(/*N=*/2); // make a snapshot every N seconds
+        private readonly TimeSpan camFrameTimeStep
+            = TimeSpan.FromSeconds(/*N=*/0); // process video frame every N seconds
         private readonly TextBuffer textBuffer
             = new(TimeSpan.FromSeconds(/*N=*/1)); // trim audio buffer N seconds on each side
         private DateTime? lastSnapshotTimestamp
             = null;
+        private DateTime? lastCamFrameTimestamp
+            = DateTime.UtcNow;
         private WhisperService.WhisperServiceClient? whisperClient;
-        //private string? outputFolder;
+        private ModelService.ModelServiceClient? yoloClient;
+        private string? outputFolder;
         private Task? whisperCallTask
+            = null;
+        private Task? yoloCallTask
             = null;
         private const double noSpeechProbThresh
             = 0.3;
 
-        // video
+        // cam video
 
-        private VideoCapture capture
+        private readonly VideoCapture capture
             = new();
 
         public AudioRecorderMainForm()
@@ -59,11 +67,39 @@ namespace OddbitAi.AudioRecorder
 
         private void ProcessCamFrame(object? sender, EventArgs e)
         {
+            void yoloCall(byte[] frameBytes)
+            {
+                try
+                {
+                    var reply = yoloClient!.Process(new ProcessRequest { Data = ByteString.CopyFrom(frameBytes) });
+                    //Console.WriteLine(reply);
+                    var replyObj = JsonSerializer.Deserialize<YoloReplyDto>(reply.Reply, new JsonSerializerOptions { PropertyNameCaseInsensitive = true, Converters = { new JsonStringEnumConverter() } });
+                    Console.WriteLine(replyObj?.Summary?.TrimEnd(',', ' ')); // TODO: move trimming to python
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex);
+                }
+            }
+
             var frame = new Mat();
             capture.Retrieve(frame);
+            
             if (!frame.IsEmpty)
             {
                 pbCamCapture.Invoke(() => pbCamCapture.Image = frame.ToBitmap());
+                var ts = DateTime.UtcNow;
+                if (ts - lastCamFrameTimestamp >= camFrameTimeStep && (yoloCallTask == null || yoloCallTask.IsCompleted))
+                {
+                    var frameBytes = Array.Empty<byte>();
+                    using (var ms = new MemoryStream())
+                    {
+                        frame.ToBitmap().Save(ms, ImageFormat.Png);
+                        frameBytes = ms.ToArray();
+                    }
+                    yoloCallTask = Task.Run(() => yoloCall(frameBytes));
+                    lastCamFrameTimestamp = ts;
+                }
             }
         }
 
@@ -71,10 +107,13 @@ namespace OddbitAi.AudioRecorder
         {
             buffer = new(/*N=*/8, waveIn.WaveFormat); // buffer size N seconds
 
-            var channel = new Channel("127.0.0.1", 9010, ChannelCredentials.Insecure);
-            whisperClient = new WhisperService.WhisperServiceClient(channel);
+            var whisperCh = new Channel("127.0.0.1", 9010, ChannelCredentials.Insecure);
+            whisperClient = new WhisperService.WhisperServiceClient(whisperCh);
 
-            var outputFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "NAudio");
+            var yoloCh = new Channel("127.0.0.1", 9011, ChannelCredentials.Insecure);
+            yoloClient = new ModelService.ModelServiceClient(yoloCh);
+
+            outputFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "NAudio");
             Directory.CreateDirectory(outputFolder);
             var logFileName = Path.Combine(outputFolder, "log.txt");
 
@@ -139,7 +178,7 @@ namespace OddbitAi.AudioRecorder
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine(ex.ToString());
+                    Console.WriteLine(ex);
                 }
             }
 

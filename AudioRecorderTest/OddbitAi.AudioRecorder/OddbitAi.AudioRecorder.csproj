@@ -18,6 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\OddbitAi.Models\OddbitAi.Models.csproj" />
     <ProjectReference Include="..\OddbitAi.Whisper\OddbitAi.Whisper.csproj" />
   </ItemGroup>
 
