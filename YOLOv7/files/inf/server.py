@@ -15,6 +15,9 @@ from utils.plots import plot_one_box
 from utils.torch_utils import select_device, load_classifier, time_synchronized, TracedModel
 
 import sys
+import shutil
+import os
+import uuid
 import signal
 from concurrent import futures
 
@@ -22,6 +25,8 @@ import grpc
 
 import contracts_pb2
 import contracts_pb2_grpc
+
+import json
 
 
 def handler(signum, frame):
@@ -32,7 +37,19 @@ signal.signal(signal.SIGINT, handler)
 
 class Service(contracts_pb2_grpc.ModelServiceServicer):
   def Process(self, request, context):
-    return 
+    #print(len(request.data))
+    dir = "/tmp/" + str(uuid.uuid4());
+    if not os.path.exists(dir):
+      os.makedirs(dir);
+    frame_file_name = dir + "/frame.png";
+    with open(f"{frame_file_name}", 'wb') as binary_file:
+      binary_file.write(request.data)
+    opt.source = dir
+    with torch.no_grad(): # what is this and is it needed?
+        results = detect();
+    #print(results)
+    shutil.rmtree(dir)
+    return contracts_pb2.ProcessReply(reply=json.dumps(results)) 
 
 
 def initialize():
@@ -82,9 +99,7 @@ def initialize():
 def detect(save_img=False):
     source, weights, view_img, save_txt, imgsz, trace = opt.source, opt.weights, opt.view_img, opt.save_txt, opt.img_size, not opt.no_trace
 
-    result = []
-
-    # Set Dataloader
+    # Set Dataloader # WARNME: can we move this to initialize?
     vid_path, vid_writer = None, None
     if webcam:
         view_img = check_imshow()
@@ -93,7 +108,7 @@ def detect(save_img=False):
     else:
         dataset = LoadImages(source, img_size=imgsz, stride=stride)
 
-    # Run inference
+    # Run inference # WARNME: can we move this to initialize?
     if device.type != 'cpu':
         model(torch.zeros(1, 3, imgsz, imgsz).to(device).type_as(next(model.parameters())))  # run once
     old_img_w = old_img_h = imgsz
@@ -129,6 +144,8 @@ def detect(save_img=False):
         #if classify:
         #    pred = apply_classifier(pred, modelc, img, im0s)
 
+        reply = { 'summary': "", 'objects': [] }
+
         # Process detections
         for i, det in enumerate(pred):  # detections per image
             if webcam:  # batch_size >= 1
@@ -149,10 +166,12 @@ def detect(save_img=False):
                     n = (det[:, -1] == c).sum()  # detections per class
                     s += f"{n} {names[int(c)]}{'s' * (n > 1)}, "  # add to string
 
-                # Create results object
+                # Create reply object
+                objects = []
+
                 for *xyxy, conf, cls in reversed(det):
                     xywh = (xyxy2xywh(torch.tensor(xyxy).view(1, 4)) / gn).view(-1).tolist()  # normalized xywh
-                    result.append({
+                    objects.append({
                         'x': xywh[0],
                         'y': xywh[1],
                         'width': xywh[2],
@@ -160,6 +179,8 @@ def detect(save_img=False):
                         'class': int(cls),
                         'name': names[int(cls)]
                         })
+
+                reply = { 'summary': s, 'objects': objects }
 
                 # Write results
                 for *xyxy, conf, cls in reversed(det):
@@ -207,7 +228,7 @@ def detect(save_img=False):
 
     print(f'Done. ({time.time() - t0:.3f}s)')
 
-    return { 'objects': result };
+    return reply
 
 
 if __name__ == '__main__':
@@ -227,7 +248,7 @@ if __name__ == '__main__':
     parser.add_argument('--augment', action='store_true', help='augmented inference')
     #parser.add_argument('--update', action='store_true', help='update all models')
     parser.add_argument('--project', default='/tmp', help='save results to project/name')
-    parser.add_argument('--name', default='exp', help='save results to project/name')
+    parser.add_argument('--name', default='', help='save results to project/name')
     parser.add_argument('--exist-ok', default=True, action='store_true', help='existing project/name ok, do not increment')
     parser.add_argument('--no-trace', action='store_true', help='don''t trace model')
     parser.add_argument('--port', type=int, default=9011, help='server port')
@@ -237,7 +258,6 @@ if __name__ == '__main__':
 
     with torch.no_grad():
         initialize()
-        print(detect())
 
     # start RPC service
     svc = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
