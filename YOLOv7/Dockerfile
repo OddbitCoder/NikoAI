@@ -25,6 +25,11 @@ RUN git clone https://github.com/WongKinYiu/yolov7.git .
 RUN pip install urllib3==1.26.16
 RUN pip install -r requirements.txt
 
+# gRPC stuff
+
+RUN pip install grpcio
+RUN pip install grpcio-tools
+
 # all done
 
 ENTRYPOINT ["tail"]
