@@ -1,0 +1,1 @@
+* https://roboflow.com/model/yolov7 (image size for different YOLOv7 models)
