@@ -1,0 +1,19 @@
+version: "3.7"
+
+services:
+  deepface:
+    image: mgrcar/deepface:0.1
+    build: .
+    volumes:
+      - ./files:/files
+      - ./models:/models
+      - ./tmp:/tmp
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    ports:
+      - "9012:9012"
