@@ -11,7 +11,7 @@ models = [
 ]
 
 detectors = [
-    "opencv",
+    #"opencv", # does not detect any faces
     "ssd",
     "dlib",
     "mtcnn",
@@ -26,6 +26,7 @@ from deepface import DeepFace
 # test all models & detectors
 
 for model in models:
+	print("*** model: " + model)
 	veri = DeepFace.verify(img1_path = "/files/img1.jpg", 
 	    img2_path = "/files/img2.jpg", 
 	    model_name = model,
@@ -34,6 +35,7 @@ for model in models:
 	print(veri)
 
 for detector in detectors:
+	print("*** detector: " + detector)
 	veri = DeepFace.verify(img1_path = "/files/img1.jpg", 
 	    img2_path = "/files/img2.jpg", 
 	    model_name = "VGG-Face",

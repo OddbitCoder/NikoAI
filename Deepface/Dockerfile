@@ -52,6 +52,9 @@ RUN pip install cmake==3.24.1.1
 RUN pip install dlib==19.20.0
 RUN pip install lightgbm==2.3.1
 
+RUN pip install mediapipe # required for mediapipe detector
+RUN pip install ultralytics # required for yolov8 detector
+
 # all done
 
 ENTRYPOINT ["tail"]
