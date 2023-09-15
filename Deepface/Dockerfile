@@ -46,11 +46,11 @@ RUN ln -s /usr/local/lib/python3.10/dist-packages/tensorrt_libs/libnvinfer_plugi
 #RUN ln -s /usr/local/lib/python3.10/dist-packages/tensorrt/libnvinfer.so.8 /usr/local/lib/python3.10/dist-packages/tensorrt/libnvinfer.so.7
 #RUN ln -s /usr/local/lib/python3.10/dist-packages/tensorrt/libnvinfer_plugin.so.8 /usr/local/lib/python3.10/dist-packages/tensorrt/libnvinfer_plugin.so.7
 
-# Some packages are optional in Deepface. Activate if your task depends on one.
+# These packages are optional in Deepface. Activate if your task depends on one.
 
-# RUN pip install cmake==3.24.1.1
-# RUN pip install dlib==19.20.0
-# RUN pip install lightgbm==2.3.1
+RUN pip install cmake==3.24.1.1
+RUN pip install dlib==19.20.0
+RUN pip install lightgbm==2.3.1
 
 # all done
 

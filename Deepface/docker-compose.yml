@@ -6,8 +6,9 @@ services:
     build: .
     volumes:
       - ./files:/files
-      - ./models:/models
+      - ./models:/root/.deepface/weights
       - ./tmp:/tmp
+
     deploy:
       resources:
         reservations:
