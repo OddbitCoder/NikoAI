@@ -1,4 +1,4 @@
-## Quick Start
+## Quick Start (Windows 11 & WSL 2)
 
 On the host:
 
@@ -8,7 +8,7 @@ On the host:
     ```
     docker-compose up -d
     ```
-    Note: Llama.cpp is built when the container is started. Use `docker logs <container ID>` to monitor the build progress. GPU support is required for Llama.cpp to build correctly; hence, it cannot be built when building the image.
+    Note: Llama.cpp is built when the container is started. Use `docker logs <container ID>` to monitor the build progress. GPU support is required for Llama.cpp to build correctly and it therefore cannot be built when building the image.
 3. Enter the container:
     ```
     docker ps
@@ -17,7 +17,7 @@ On the host:
     
 Inside the container:
     
-1. Quick test 
+1. Quick test:
     ```
 	./main --interactive-first -r "###" --temp 0 -c 2048 -n -1 --ignore-eos --repeat_penalty 1.2 --instruct -m /models/llama-2-7b-chat/llama-2-7b-chat.Q4_0.gguf -ngl 35
     ```
