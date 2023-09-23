@@ -1,0 +1,1 @@
+./main --interactive-first -r "###" --temp 0 -c 2048 -n -1 --ignore-eos --repeat_penalty 1.2 --instruct -m /models/llama-2-7b-chat/llama-2-7b-chat.Q4_0.gguf -ngl 35

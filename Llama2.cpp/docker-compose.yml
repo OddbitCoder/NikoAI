@@ -1,0 +1,21 @@
+version: "3.7"
+
+services:
+  llama_cpu:
+    image: mgrcar/llama_cpp:0.1
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./files:/files
+      - /models:/models
+      - ./tmp:/tmp
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    ports:
+      - "9015:9015"
