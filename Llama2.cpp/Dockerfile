@@ -27,14 +27,15 @@ RUN pip install -r requirements.txt
 
 # python LLAMA
 
-RUN pip install llama-cpp-python 
-#RUN pip install llama-cpp-python==0.1.78 # this still supports GGML models
+RUN pip install starlette==0.27.*
+RUN pip install llama-cpp-python[server]
+#RUN pip install llama-cpp-python[server]==0.1.78 # this still supports GGML models
 
-# gRPC stuff
+# gRPC
 
 RUN pip install grpcio
 RUN pip install grpcio-tools
 
 # all done
 
-ENTRYPOINT ["/files/startup.sh"]
+ENTRYPOINT ["/files/start-server.sh"]

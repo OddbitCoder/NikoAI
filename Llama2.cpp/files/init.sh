@@ -7,5 +7,3 @@ else
     make clean && LLAMA_CUBLAS=1 make -j
     echo "Done."
 fi
-
-tail -f /dev/null
