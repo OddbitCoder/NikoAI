@@ -10,11 +10,6 @@ RUN apt-get update
 RUN apt-get install ffmpeg -y
 RUN apt-get install git -y
 
-# gRPC stuff
-
-#RUN pip install grpcio
-#RUN pip install grpcio-tools
-
 # install Python
 
 RUN apt-get install python3 -y
@@ -48,12 +43,18 @@ RUN ln -s /usr/local/lib/python3.10/dist-packages/tensorrt_libs/libnvinfer_plugi
 
 # These packages are optional in Deepface. Activate if your task depends on one.
 
-RUN pip install cmake==3.24.1.1
-RUN pip install dlib==19.20.0
-RUN pip install lightgbm==2.3.1
-
 RUN pip install mediapipe # required for mediapipe detector
 RUN pip install ultralytics # required for yolov8 detector
+
+RUN pip install dlib==19.20.0
+#RUN pip install cmake==3.24.1.1
+#RUN pip install lightgbm==2.3.1
+
+# gRPC stuff
+
+RUN pip install grpcio
+RUN pip install grpcio-tools
+RUN pip install protobuf==3.20.*
 
 # all done
 

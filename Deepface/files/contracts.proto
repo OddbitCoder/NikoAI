@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+option csharp_namespace = "OddbitAi.ModelServer";
+
+message ProcessRequest {
+    bytes data = 1;
+};
+
+message ProcessReply {
+    string reply = 1;
+}
+
+service ModelService {
+    rpc Process (ProcessRequest) returns (ProcessReply);
+}

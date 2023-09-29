@@ -21,7 +21,26 @@ detectors = [
     "yunet"
 ]
 
+import tensorflow as tf
+
 from deepface import DeepFace
+
+import os
+
+# disable GPU
+os.environ["CUDA_VISIBLE_DEVICES"]=""
+
+# configure GPU memory usage
+# WARNME: This allocates as much mem as needed. However, it somehow fails to see how much memory is available in total (~5 GB instead of 8 GB). 
+# If memory limit is set explicitly on the logical device, the memory growth setting is ignored.
+gpus = tf.config.list_physical_devices('GPU')
+if gpus: 
+    for gpu in gpus:
+        tf.config.experimental.set_memory_growth(gpu, True)
+    # tf.config.set_logical_device_configuration(
+    #     gpus[0],
+    #     [tf.config.LogicalDeviceConfiguration(memory_limit=8*1024)]
+    # )
 
 # test all models & detectors
 
