@@ -8,5 +8,6 @@
         public double Height { get; set; }
         public int Class { get; set; }
         public string? Name { get; set; }
+        public bool Verified { get; set; }
     }
 }

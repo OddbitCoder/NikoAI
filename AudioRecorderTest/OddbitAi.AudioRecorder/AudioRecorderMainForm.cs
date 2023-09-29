@@ -37,20 +37,27 @@ namespace OddbitAi.AudioRecorder
             = false;
         private readonly TimeSpan snapshotTimeStep
             = TimeSpan.FromSeconds(/*N=*/2); // make a snapshot every N seconds
-        private readonly TimeSpan camFrameTimeStep
+        private readonly TimeSpan yoloFrameTimeStep
+            = TimeSpan.FromSeconds(/*N=*/0); // process video frame every N seconds
+        private readonly TimeSpan dfFrameTimeStep
             = TimeSpan.FromSeconds(/*N=*/0); // process video frame every N seconds
         private readonly TextBuffer textBuffer
             = new(TimeSpan.FromSeconds(/*N=*/1)); // trim audio buffer N seconds on each side
         private DateTime? lastSnapshotTimestamp
             = null;
-        private DateTime? lastCamFrameTimestamp
+        private DateTime? lastYoloFrameTimestamp
+            = DateTime.UtcNow;
+        private DateTime? lastDfFrameTimestamp
             = DateTime.UtcNow;
         private WhisperService.WhisperServiceClient? whisperClient;
         private ModelService.ModelServiceClient? yoloClient;
+        private ModelService.ModelServiceClient? dfClient;
         private string? outputFolder;
         private Task? whisperCallTask
             = null;
         private Task? yoloCallTask
+            = null;
+        private Task? dfCallTask
             = null;
         private const double noSpeechProbThresh
             = 0.3;
@@ -82,6 +89,28 @@ namespace OddbitAi.AudioRecorder
                 }
             }
 
+            void dfCall(byte[] frameBytes)
+            {
+                try
+                {
+                    var reply = dfClient!.Process(new ProcessRequest { Data = ByteString.CopyFrom(frameBytes) });
+                    //Console.WriteLine(reply.Reply);
+                    var replyObj = JsonSerializer.Deserialize<YoloReplyDto>(reply.Reply, new JsonSerializerOptions { PropertyNameCaseInsensitive = true, Converters = { new JsonStringEnumConverter() } });
+                    foreach (var obj in replyObj?.Objects ?? Array.Empty<YoloObjectDto>())
+                    {
+                        if (obj.Verified) 
+                        {
+                            Console.Write($"{obj.Name} ");
+                        }
+                    }
+                    Console.WriteLine();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex);
+                }
+            }
+
             var frame = new Mat();
             capture.Retrieve(frame);
             
@@ -89,7 +118,7 @@ namespace OddbitAi.AudioRecorder
             {
                 pbCamCapture.Invoke(() => pbCamCapture.Image = frame.ToBitmap());
                 var ts = DateTime.UtcNow;
-                if (ts - lastCamFrameTimestamp >= camFrameTimeStep && (yoloCallTask == null || yoloCallTask.IsCompleted))
+                if (ts - lastYoloFrameTimestamp >= yoloFrameTimeStep && (yoloCallTask == null || yoloCallTask.IsCompleted))
                 {
                     var frameBytes = Array.Empty<byte>();
                     using (var ms = new MemoryStream())
@@ -97,8 +126,20 @@ namespace OddbitAi.AudioRecorder
                         frame.ToBitmap().Save(ms, ImageFormat.Png);
                         frameBytes = ms.ToArray();
                     }
-                    yoloCallTask = Task.Run(() => yoloCall(frameBytes));
-                    lastCamFrameTimestamp = ts;
+                    //yoloCallTask = Task.Run(() => yoloCall(frameBytes)); // WARNME: temporarily disabled
+                    lastYoloFrameTimestamp = ts;
+                }
+                if (ts - lastDfFrameTimestamp >= dfFrameTimeStep && (dfCallTask == null || dfCallTask.IsCompleted))
+                {
+                    // TODO: create function to handle this dup code
+                    var frameBytes = Array.Empty<byte>();
+                    using (var ms = new MemoryStream())
+                    {
+                        frame.ToBitmap().Save(ms, ImageFormat.Png);
+                        frameBytes = ms.ToArray();
+                    }
+                    dfCallTask = Task.Run(() => dfCall(frameBytes)); 
+                    lastDfFrameTimestamp = ts;
                 }
             }
         }
@@ -112,6 +153,9 @@ namespace OddbitAi.AudioRecorder
 
             var yoloCh = new Channel("127.0.0.1", 9011, ChannelCredentials.Insecure);
             yoloClient = new ModelService.ModelServiceClient(yoloCh);
+
+            var dfCh = new Channel("127.0.0.1", 9012, ChannelCredentials.Insecure);
+            dfClient = new ModelService.ModelServiceClient(dfCh);
 
             outputFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "NAudio");
             Directory.CreateDirectory(outputFolder);
