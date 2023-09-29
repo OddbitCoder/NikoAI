@@ -291,13 +291,13 @@ def extract_faces(
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--port', type=int, default=9012, help='server port')
-    parser.add_argument('--gpu', default=False, action='store_true', help='enable GPU support')
+    parser.add_argument('--gpu', action='store_true', help='enable GPU support')
     parser.add_argument('--gpu-mem', type=int, default=0, help='GPU memory limit (0 or negative = auto-grow)')
     parser.add_argument('--detector', type=str, default='ssd', help='face detection model (ssd, dlib, mtcnn, retinaface, mediapipe, yolov8, yunet)') 
     parser.add_argument("--model", type=str, default='ArcFace', help='face recognition model (VGG-Face, Facenet, Facenet512, OpenFace, DeepFace, DeepID, ArcFace, Dlib, SFace)') 
     parser.add_argument("--db", type=str, default='/files/db', help='known faces database location') 
     parser.add_argument("--dist", type=str, default='cosine', help='distance metric (cosine, euclidean, euclidean_l2)') 
-    parser.add_argument("--greedy", default=True, action='store_true', help='greedy database search')
+    parser.add_argument("--greedy", action='store_true', help='greedy database search')
 
     opt = parser.parse_args()
     print(opt)	
