@@ -31,20 +31,19 @@ RUN apt-get install google-perftools -y
 
 WORKDIR /root/sd
 RUN git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui.git .
+#RUN git checkout tags/v1.5.2 -b b_v1.5.2
 RUN chmod +x webui.sh
 RUN cp launch.py launch.py.bak
 RUN sed -i 's/start()//g' launch.py
+ENV venv_dir="-"
 RUN ./webui.sh -f --skip-torch-cuda-test --xformers
 RUN rm launch.py && mv launch.py.bak launch.py
 
 # install ControlNet deps
 
-RUN venv/bin/python3 -m pip install mediapipe svglib fvcore --prefer-binary
+RUN python3 -m pip install mediapipe svglib fvcore --prefer-binary
 
 # all done
 
-#ENTRYPOINT ["/root/sd/webui.sh"]
-#CMD ["-f","--listen","--enable-insecure-extension-access","--xformers"]
-
-ENTRYPOINT ["tail"]
-CMD ["-f","/dev/null"]
+ENTRYPOINT ["/root/sd/webui.sh"]
+CMD ["-f","--listen","--enable-insecure-extension-access","--xformers"]
