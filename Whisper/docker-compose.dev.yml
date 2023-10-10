@@ -1,0 +1,22 @@
+version: "3.7"
+
+services:
+  whisper:
+    image: mgrcar/whisper:0.1
+    build: .
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    entrypoint:
+      - tail
+      - -f
+      - /dev/null              
+    ports:
+      - "9010:9010"
+    volumes:
+      - ./files:/files
+      - ./models:/root/.cache/whisper
