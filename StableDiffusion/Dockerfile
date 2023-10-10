@@ -31,7 +31,7 @@ RUN apt-get install google-perftools -y
 
 WORKDIR /root/sd
 RUN git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui.git .
-#RUN git checkout tags/v1.5.2 -b b_v1.5.2
+RUN git checkout tags/v1.5.2 -b b_v1.5.2 # pin version
 RUN chmod +x webui.sh
 RUN cp launch.py launch.py.bak
 RUN sed -i 's/start()//g' launch.py
@@ -42,6 +42,10 @@ RUN rm launch.py && mv launch.py.bak launch.py
 # install ControlNet deps
 
 RUN python3 -m pip install mediapipe svglib fvcore --prefer-binary
+
+# pin httpx ver
+
+RUN pip install httpx==0.24.1
 
 # all done
 

@@ -32,5 +32,4 @@ RUN pip install grpcio-tools
 
 # all done
 
-ENTRYPOINT ["tail"]
-CMD ["-f","/dev/null"]
+ENTRYPOINT ["/files/run-server-big.sh"]

@@ -8,6 +8,10 @@ services:
       - ./files:/files
       - ./models:/root/.deepface/weights
       - ./tmp:/tmp
+    entrypoint:
+      - tail
+      - -f
+      - /dev/null
     deploy:
       resources:
         reservations:

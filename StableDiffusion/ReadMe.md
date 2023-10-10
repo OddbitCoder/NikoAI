@@ -1,6 +1,6 @@
 ## Quick Start
 
-### User Mode
+### Server Mode
 
 1. Start the container:
     ```
@@ -25,7 +25,7 @@ On the host:
     
 Inside the container:
     
-1. Start the UI server (on port 7860):
+1. Start the UI server on port 7860:
     ```
     /root/sd/webui.sh -f --listen --enable-insecure-extension-access --xformers
     ```

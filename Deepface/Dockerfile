@@ -58,5 +58,5 @@ RUN pip install protobuf==3.20.*
 
 # all done
 
-ENTRYPOINT ["tail"]
-CMD ["-f","/dev/null"]
+ENTRYPOINT ["python3"]
+CMD ["/files/server.py"]

@@ -1,13 +1,17 @@
 version: "3.7"
 
 services:
-  deepface:
-    image: mgrcar/deepface:0.1
+  yolov7:
+    image: mgrcar/yolov7:0.1
     build: .
     volumes:
       - ./files:/files
-      - ./models:/root/.deepface/weights
+      - ./models:/models
       - ./tmp:/tmp
+    entrypoint:
+      - tail
+      - -f
+      - /dev/null
     deploy:
       resources:
         reservations:
@@ -16,4 +20,4 @@ services:
               count: 1
               capabilities: [gpu]
     ports:
-      - "9012:9012"
+      - "9011:9011"
