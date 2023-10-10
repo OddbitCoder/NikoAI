@@ -1,0 +1,20 @@
+version: "3.7"
+
+services:
+  pyannote-audio:
+    image: mgrcar/pyannote-audio:0.1
+    build: .
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    entrypoint:
+      - tail
+      - -f
+      - /dev/null              
+    volumes:
+      - ./files:/files
+      - ./models:/models
