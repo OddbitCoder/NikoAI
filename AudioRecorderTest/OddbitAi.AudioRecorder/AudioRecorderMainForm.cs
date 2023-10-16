@@ -72,14 +72,12 @@ namespace OddbitAi.AudioRecorder
         private readonly VideoCapture capture
             = new();
 
-        private readonly OverlayManager overlayManager;
-
         public AudioRecorderMainForm()
         {
             InitializeComponent();
             // camera video overlay
-            pbVideo.Controls.Add(pbOverlay);
-            overlayManager = new(pbOverlay, capture.Width, capture.Height);
+            pbVideo.Controls.Add(videoOverlay);
+            videoOverlay.FrameSize = new Size(capture.Width, capture.Height);
         }
 
         private void ProcessCamFrame(object? sender, EventArgs e)
@@ -92,7 +90,7 @@ namespace OddbitAi.AudioRecorder
                     //Console.WriteLine(reply);
                     var replyObj = JsonSerializer.Deserialize<VisionModelResponseDto>(reply.Reply, new JsonSerializerOptions { PropertyNameCaseInsensitive = true, Converters = { new JsonStringEnumConverter() } });
                     //state.AddDetectedObjects(replyObj);
-                    overlayManager.UpdateObjects(replyObj.Objects);
+                    videoOverlay.UpdateObjectAnnotations(replyObj.Objects);
                     Console.WriteLine($"\"{replyObj?.Summary}\"");
                     pbLedYOLO.Image = imgLstLights.Images["on"];
                 }
@@ -100,7 +98,7 @@ namespace OddbitAi.AudioRecorder
                 {
                     //Console.WriteLine(ex);
                     pbLedYOLO.Image = imgLstLights.Images["off"];
-                    overlayManager.UpdateObjects(Array.Empty<DetectedObjectDto>());
+                    videoOverlay.UpdateObjectAnnotations(Array.Empty<DetectedObjectDto>());
                 }
             }
 
@@ -111,7 +109,7 @@ namespace OddbitAi.AudioRecorder
                     var reply = dfClient!.Process(new ProcessRequest { Data = ByteString.CopyFrom(frameBytes) });
                     //Console.WriteLine(reply.Reply);
                     var replyObj = JsonSerializer.Deserialize<VisionModelResponseDto>(reply.Reply, new JsonSerializerOptions { PropertyNameCaseInsensitive = true, Converters = { new JsonStringEnumConverter() } });
-                    overlayManager.UpdateFaces(replyObj.Objects.Where(x => x.Verified));
+                    videoOverlay.UpdateFaceAnnotations(replyObj.Objects.Where(x => x.Verified));
                     //foreach (var obj in replyObj?.Objects ?? Array.Empty<DetectedObjectDto>())
                     //{
                     //    if (obj.Verified)
@@ -126,7 +124,7 @@ namespace OddbitAi.AudioRecorder
                 {
                     //Console.WriteLine(ex);
                     pbLedDeepface.Image = imgLstLights.Images["off"];
-                    overlayManager.UpdateFaces(Array.Empty<DetectedObjectDto>());
+                    videoOverlay.UpdateFaceAnnotations(Array.Empty<DetectedObjectDto>());
                 }
             }
 
@@ -299,16 +297,6 @@ namespace OddbitAi.AudioRecorder
         private void buttonStop_Click(object sender, EventArgs e)
         {
             waveIn.StopRecording();
-        }
-
-        private void pbOverlay_Paint(object sender, PaintEventArgs e)
-        {
-            overlayManager.Paint();
-        }
-
-        private void pnlTranscript_Resize(object sender, EventArgs e)
-        {
-            txtBoxTranscript.Refresh();
         }
     }
 }

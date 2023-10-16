@@ -1,6 +1,4 @@
-﻿using OddbitAi.Controls;
-
-namespace OddbitAi.AudioRecorder
+﻿namespace OddbitAi.AudioRecorder
 {
     partial class AudioRecorderMainForm
     {
@@ -46,11 +44,10 @@ namespace OddbitAi.AudioRecorder
             pbLedWhisper = new PictureBox();
             pnlTranscript = new Panel();
             txtBoxTranscript = new RichTextBox();
-            pbOverlay = new PictureBox();
+            videoOverlay = new Overlay();
             pnlVideo = new Panel();
             pbVideo = new PictureBox();
             imgLstLights = new ImageList(components);
-            overlayVideo = new Overlay();
             pnlRightPanel.SuspendLayout();
             pnlLedDeepface.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pbLedDeepface).BeginInit();
@@ -59,7 +56,6 @@ namespace OddbitAi.AudioRecorder
             pnlLedWhisper.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pbLedWhisper).BeginInit();
             pnlTranscript.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)pbOverlay).BeginInit();
             pnlVideo.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pbVideo).BeginInit();
             SuspendLayout();
@@ -201,7 +197,6 @@ namespace OddbitAi.AudioRecorder
             pnlTranscript.Name = "pnlTranscript";
             pnlTranscript.Size = new Size(1241, 356);
             pnlTranscript.TabIndex = 4;
-            pnlTranscript.Resize += pnlTranscript_Resize;
             // 
             // txtBoxTranscript
             // 
@@ -213,20 +208,22 @@ namespace OddbitAi.AudioRecorder
             txtBoxTranscript.TabIndex = 0;
             txtBoxTranscript.Text = "";
             // 
-            // pbOverlay
+            // videoOverlay
             // 
-            pbOverlay.BackColor = Color.Transparent;
-            pbOverlay.Dock = DockStyle.Fill;
-            pbOverlay.Location = new Point(0, 0);
-            pbOverlay.Name = "pbOverlay";
-            pbOverlay.Size = new Size(1241, 725);
-            pbOverlay.TabIndex = 4;
-            pbOverlay.TabStop = false;
-            pbOverlay.Paint += pbOverlay_Paint;
+            videoOverlay.AnnotationLineWidth = 8F;
+            videoOverlay.Dock = DockStyle.Fill;
+            videoOverlay.FaceAnnotationColor = Color.Yellow;
+            videoOverlay.FaceAnnotationLabelTextColor = Color.Black;
+            videoOverlay.Location = new Point(0, 0);
+            videoOverlay.Name = "videoOverlay";
+            videoOverlay.ObjectAnnotationColor = Color.Red;
+            videoOverlay.ObjectAnnotationLabelTextColor = Color.White;
+            videoOverlay.Size = new Size(1241, 725);
+            videoOverlay.TabIndex = 4;
             // 
             // pnlVideo
             // 
-            pnlVideo.Controls.Add(pbOverlay);
+            pnlVideo.Controls.Add(videoOverlay);
             pnlVideo.Controls.Add(pbVideo);
             pnlVideo.Dock = DockStyle.Fill;
             pnlVideo.Location = new Point(0, 0);
@@ -252,16 +249,6 @@ namespace OddbitAi.AudioRecorder
             imgLstLights.Images.SetKeyName(0, "off");
             imgLstLights.Images.SetKeyName(1, "on");
             // 
-            // overlayVideo
-            // 
-            overlayVideo.BackColor = Color.IndianRed;
-            overlayVideo.Dock = DockStyle.Fill;
-            overlayVideo.Location = new Point(0, 0);
-            overlayVideo.Name = "overlayVideo";
-            overlayVideo.Size = new Size(1241, 725);
-            overlayVideo.TabIndex = 4;
-            overlayVideo.TabStop = false;
-            // 
             // AudioRecorderMainForm
             // 
             AutoScaleDimensions = new SizeF(17F, 41F);
@@ -282,7 +269,6 @@ namespace OddbitAi.AudioRecorder
             pnlLedWhisper.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)pbLedWhisper).EndInit();
             pnlTranscript.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)pbOverlay).EndInit();
             pnlVideo.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)pbVideo).EndInit();
             ResumeLayout(false);
@@ -295,7 +281,7 @@ namespace OddbitAi.AudioRecorder
         private Panel pnlRightPanel;
         private Panel pnlTranscript;
         private RichTextBox txtBoxTranscript;
-        private PictureBox pbOverlay;
+        private Overlay videoOverlay;
         private Panel pnlVideo;
         private PictureBox pbVideo;
         private Panel pnlLedWhisper;
@@ -308,6 +294,5 @@ namespace OddbitAi.AudioRecorder
         private Label lblLedYOLO;
         private PictureBox pbLedYOLO;
         private ImageList imgLstLights;
-        private Overlay overlayVideo;
     }
 }
