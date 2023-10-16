@@ -85,13 +85,13 @@ class Service(contracts_pb2_grpc.ModelServiceServicer):
                                 "threshold": threshold,
                                 "verified": bool(distance <= threshold)
                             }
-                            if distance <= threshold and greedy_search:
+                            if distance <= threshold:
                                 break # for img_fn 
             # for each person_fn continue here...
         # for each embedding continue here...
         if best_match != None:
             results.append(best_match)
-            if greedy_search and best_match["verified"]:
+            if best_match["verified"]:
                 # put best_match["name"] to tabu list
                 tabu.add(best_match["name"])
 
@@ -103,8 +103,7 @@ def init():
     global model_name
     global db_dir
     global distance_metric
-    global greedy_search
-    gpu_enable, gpu_mem, detector_name, model_name, db_dir, distance_metric, greedy_search = opt.gpu, opt.gpu_mem, opt.detector, opt.model, opt.db, opt.dist, opt.greedy
+    gpu_enable, gpu_mem, detector_name, model_name, db_dir, distance_metric = opt.gpu, opt.gpu_mem, opt.detector, opt.model, opt.db, opt.dist
     if not gpu_enable:
         os.environ["CUDA_VISIBLE_DEVICES"] = ""
     else:
@@ -271,12 +270,14 @@ def extract_faces(
             img_pixels = np.expand_dims(img_pixels, axis=0)
             img_pixels /= 255  # normalize input in [0, 1]
 
-            # int cast is for the exception - object of type 'float32' is not JSON serializable
+            img_w = img.shape[1]
+            img_h = img.shape[0]
+
             region_obj = {
-                "x": int(current_region[0]),
-                "y": int(current_region[1]),
-                "w": int(current_region[2]),
-                "h": int(current_region[3]),
+                "x": float(current_region[0] / img_w),
+                "y": float(current_region[1] / img_h),
+                "w": float(current_region[2] / img_w),
+                "h": float(current_region[3] / img_h),
             }
 
             extracted_face = [img_pixels, region_obj, confidence]
@@ -297,7 +298,6 @@ if __name__ == '__main__':
     parser.add_argument("--model", type=str, default='ArcFace', help='face recognition model (VGG-Face, Facenet, Facenet512, OpenFace, DeepFace, DeepID, ArcFace, Dlib, SFace)') 
     parser.add_argument("--db", type=str, default='/files/db', help='known faces database location') 
     parser.add_argument("--dist", type=str, default='cosine', help='distance metric (cosine, euclidean, euclidean_l2)') 
-    parser.add_argument("--greedy", action='store_true', help='greedy database search')
 
     opt = parser.parse_args()
     print(opt)	
