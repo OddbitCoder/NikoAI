@@ -169,13 +169,24 @@ def detect(save_img=False):
                 # Create reply object
                 objects = []
 
+                # WARNME: I do not know why, but x,y from xywh are not computed correctly. I therefore simply use xyxy and I normalize it wrt the size of im0.
+
+                im0_w = im0.shape[1]
+                im0_h = im0.shape[0]
+
                 for *xyxy, conf, cls in reversed(det):
-                    xywh = (xyxy2xywh(torch.tensor(xyxy).view(1, 4)) / gn).view(-1).tolist()  # normalized xywh
+                    #xywh = (xyxy2xywh(torch.tensor(xyxy).view(1, 4)) / gn).view(-1).tolist()  # normalized xywh
+                    x = float(xyxy[0]) / im0_w
+                    y = float(xyxy[1]) / im0_h
                     objects.append({
-                        'x': xywh[0],
-                        'y': xywh[1],
-                        'width': xywh[2],
-                        'height': xywh[3],
+                        #'x': xywh[0],
+                        #'y': xywh[1],
+                        #'width': xywh[2],
+                        #'height': xywh[3],
+                        'x': x,
+                        'y': y,
+                        'width': float(xyxy[2]) / im0_w - x,
+                        'height': float(xyxy[3]) / im0_h - y, 
                         'class': int(cls),
                         'name': names[int(cls)],
                         'score': float(conf)
