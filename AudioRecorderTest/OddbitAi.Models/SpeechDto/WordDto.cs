@@ -1,4 +1,4 @@
-﻿namespace OddbitAi.Models.AsrDto
+﻿namespace OddbitAi.Models.SpeechDto
 {
     public class WordDto
     {

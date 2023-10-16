@@ -8,7 +8,7 @@ using NAudio.Wave;
 using OddbitAi.Whisper;
 using OddbitAi.Whisper.Dto;
 using OddbitAi.Models;
-using OddbitAi.Models.YoloDto;
+using OddbitAi.Models.VisionDto;
 using Emgu.CV;
 
 namespace OddbitAi.AudioRecorder
@@ -62,14 +62,24 @@ namespace OddbitAi.AudioRecorder
         private const double noSpeechProbThresh
             = 0.3;
 
+        // state
+
+        private readonly State state
+            = new();
+
         // cam video
 
         private readonly VideoCapture capture
             = new();
 
+        private readonly OverlayManager overlayManager;
+
         public AudioRecorderMainForm()
         {
             InitializeComponent();
+            // camera video overlay
+            pbVideo.Controls.Add(pbOverlay);
+            overlayManager = new(pbOverlay, capture.Width, capture.Height);
         }
 
         private void ProcessCamFrame(object? sender, EventArgs e)
@@ -80,12 +90,17 @@ namespace OddbitAi.AudioRecorder
                 {
                     var reply = yoloClient!.Process(new ProcessRequest { Data = ByteString.CopyFrom(frameBytes) });
                     //Console.WriteLine(reply);
-                    var replyObj = JsonSerializer.Deserialize<YoloReplyDto>(reply.Reply, new JsonSerializerOptions { PropertyNameCaseInsensitive = true, Converters = { new JsonStringEnumConverter() } });
-                    Console.WriteLine(replyObj?.Summary?.TrimEnd(',', ' ')); // TODO: move trimming to python
+                    var replyObj = JsonSerializer.Deserialize<VisionModelResponseDto>(reply.Reply, new JsonSerializerOptions { PropertyNameCaseInsensitive = true, Converters = { new JsonStringEnumConverter() } });
+                    //state.AddDetectedObjects(replyObj);
+                    overlayManager.UpdateObjects(replyObj.Objects);
+                    Console.WriteLine($"\"{replyObj?.Summary}\"");
+                    pbLedYOLO.Image = imgLstLights.Images["on"];
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine(ex);
+                    //Console.WriteLine(ex);
+                    pbLedYOLO.Image = imgLstLights.Images["off"];
+                    overlayManager.UpdateObjects(Array.Empty<DetectedObjectDto>());
                 }
             }
 
@@ -95,28 +110,32 @@ namespace OddbitAi.AudioRecorder
                 {
                     var reply = dfClient!.Process(new ProcessRequest { Data = ByteString.CopyFrom(frameBytes) });
                     //Console.WriteLine(reply.Reply);
-                    var replyObj = JsonSerializer.Deserialize<YoloReplyDto>(reply.Reply, new JsonSerializerOptions { PropertyNameCaseInsensitive = true, Converters = { new JsonStringEnumConverter() } });
-                    foreach (var obj in replyObj?.Objects ?? Array.Empty<YoloObjectDto>())
-                    {
-                        if (obj.Verified) 
-                        {
-                            Console.Write($"{obj.Name} ");
-                        }
-                    }
-                    Console.WriteLine();
+                    var replyObj = JsonSerializer.Deserialize<VisionModelResponseDto>(reply.Reply, new JsonSerializerOptions { PropertyNameCaseInsensitive = true, Converters = { new JsonStringEnumConverter() } });
+                    overlayManager.UpdateFaces(replyObj.Objects.Where(x => x.Verified));
+                    //foreach (var obj in replyObj?.Objects ?? Array.Empty<DetectedObjectDto>())
+                    //{
+                    //    if (obj.Verified)
+                    //    {
+                    //        Console.Write($"{obj.Name} ");
+                    //    }
+                    //}
+                    //Console.WriteLine();
+                    pbLedDeepface.Image = imgLstLights.Images["on"];
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine(ex);
+                    //Console.WriteLine(ex);
+                    pbLedDeepface.Image = imgLstLights.Images["off"];
+                    overlayManager.UpdateFaces(Array.Empty<DetectedObjectDto>());
                 }
             }
 
             var frame = new Mat();
             capture.Retrieve(frame);
-            
+
             if (!frame.IsEmpty)
             {
-                pbCamCapture.Invoke(() => pbCamCapture.Image = frame.ToBitmap());
+                pbVideo.Invoke(() => pbVideo.Image = frame.ToBitmap());
                 var ts = DateTime.UtcNow;
                 if (ts - lastYoloFrameTimestamp >= yoloFrameTimeStep && (yoloCallTask == null || yoloCallTask.IsCompleted))
                 {
@@ -126,7 +145,7 @@ namespace OddbitAi.AudioRecorder
                         frame.ToBitmap().Save(ms, ImageFormat.Png);
                         frameBytes = ms.ToArray();
                     }
-                    //yoloCallTask = Task.Run(() => yoloCall(frameBytes)); // WARNME: temporarily disabled
+                    yoloCallTask = Task.Run(() => yoloCall(frameBytes));
                     lastYoloFrameTimestamp = ts;
                 }
                 if (ts - lastDfFrameTimestamp >= dfFrameTimeStep && (dfCallTask == null || dfCallTask.IsCompleted))
@@ -138,7 +157,7 @@ namespace OddbitAi.AudioRecorder
                         frame.ToBitmap().Save(ms, ImageFormat.Png);
                         frameBytes = ms.ToArray();
                     }
-                    dfCallTask = Task.Run(() => dfCall(frameBytes)); 
+                    dfCallTask = Task.Run(() => dfCall(frameBytes));
                     lastDfFrameTimestamp = ts;
                 }
             }
@@ -178,12 +197,12 @@ namespace OddbitAi.AudioRecorder
                     if (textObj?.Format == ResponseFormat.NeMo)
                     {
                         // handle NeMo response
-                        Console.WriteLine(textObj.Text);
+                        //Console.WriteLine(textObj.Text);
                         return;
                     }
                     else if (textObj?.Format == ResponseFormat.Exception)
                     {
-                        Console.WriteLine(textObj.Text);
+                        //Console.WriteLine(textObj.Text);
                         return;
                     }
                     foreach (var seg in textObj?.Segments ?? Array.Empty<SegmentDto>())
@@ -219,10 +238,12 @@ namespace OddbitAi.AudioRecorder
                         textBuffer.Print();
                         Console.WriteLine("--");
                     }
+                    pbLedWhisper.Image = imgLstLights.Images["on"];
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine(ex);
+                    //Console.WriteLine(ex);
+                    pbLedWhisper.Image = imgLstLights.Images["off"];
                 }
             }
 
@@ -278,6 +299,16 @@ namespace OddbitAi.AudioRecorder
         private void buttonStop_Click(object sender, EventArgs e)
         {
             waveIn.StopRecording();
+        }
+
+        private void pbOverlay_Paint(object sender, PaintEventArgs e)
+        {
+            overlayManager.Paint();
+        }
+
+        private void pnlTranscript_Resize(object sender, EventArgs e)
+        {
+            txtBoxTranscript.Refresh();
         }
     }
 }

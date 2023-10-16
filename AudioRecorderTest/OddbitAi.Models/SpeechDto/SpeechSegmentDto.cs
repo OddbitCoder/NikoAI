@@ -1,8 +1,8 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace OddbitAi.Models.AsrDto
+namespace OddbitAi.Models.SpeechDto
 {
-    public class SegmentDto
+    public class SpeechSegmentDto
     {
         public int Id { get; set; }
         public double Start { get; set; }

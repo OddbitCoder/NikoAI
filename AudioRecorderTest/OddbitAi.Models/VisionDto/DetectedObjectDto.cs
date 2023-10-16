@@ -1,6 +1,6 @@
-﻿namespace OddbitAi.Models.YoloDto
+﻿namespace OddbitAi.Models.VisionDto
 {
-    public class YoloObjectDto
+    public class DetectedObjectDto
     {
         public double X { get; set; }
         public double Y { get; set; }
