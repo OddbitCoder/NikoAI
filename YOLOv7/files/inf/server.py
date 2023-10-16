@@ -192,7 +192,7 @@ def detect(save_img=False):
                         'score': float(conf)
                         })
 
-                reply = { 'summary': s, 'objects': objects }
+                reply = { 'summary': s.rstrip(", "), 'objects': objects }
 
                 # Write results
                 for *xyxy, conf, cls in reversed(det):
