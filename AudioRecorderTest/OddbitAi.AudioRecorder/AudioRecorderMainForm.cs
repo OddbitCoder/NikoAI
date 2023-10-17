@@ -86,7 +86,7 @@ namespace OddbitAi.AudioRecorder
             videoOverlay.FrameSize = new Size(capture.Width, capture.Height);
         }
 
-        private void ProcessCamFrame(object? sender, EventArgs e)
+        private void ProcessVideoFrame(object? sender, EventArgs e)
         {
             void yoloCall(byte[] frameBytes)
             {
@@ -185,7 +185,7 @@ namespace OddbitAi.AudioRecorder
             Directory.CreateDirectory(outputFolder);
             var logFileName = Path.Combine(outputFolder, "log.txt");
 
-            capture.ImageGrabbed += ProcessCamFrame;
+            capture.ImageGrabbed += (sender, e) => Invoke(() => ProcessVideoFrame(sender, e));
             capture.Start();
 
             void whisperCall()
