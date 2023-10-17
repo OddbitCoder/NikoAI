@@ -43,7 +43,7 @@
             lblStatusWhisper = new Label();
             pbStatusLedWhisper = new PictureBox();
             pnlTranscript = new Panel();
-            txtBoxTranscript = new RichTextBox();
+            transcriptViewer = new TranscriptViewer();
             videoOverlay = new Overlay();
             pnlVideo = new Panel();
             pbVideo = new PictureBox();
@@ -68,7 +68,6 @@
             buttonRecord.TabIndex = 0;
             buttonRecord.Text = "Record";
             buttonRecord.UseVisualStyleBackColor = true;
-            buttonRecord.Visible = false;
             buttonRecord.Click += buttonRecord_Click;
             // 
             // buttonStop
@@ -80,7 +79,6 @@
             buttonStop.TabIndex = 1;
             buttonStop.Text = "Stop";
             buttonStop.UseVisualStyleBackColor = true;
-            buttonStop.Visible = false;
             buttonStop.Click += buttonStop_Click;
             // 
             // pnlRightPanel
@@ -191,22 +189,23 @@
             // 
             // pnlTranscript
             // 
-            pnlTranscript.Controls.Add(txtBoxTranscript);
+            pnlTranscript.Controls.Add(transcriptViewer);
             pnlTranscript.Dock = DockStyle.Bottom;
             pnlTranscript.Location = new Point(0, 725);
             pnlTranscript.Name = "pnlTranscript";
             pnlTranscript.Size = new Size(1241, 356);
             pnlTranscript.TabIndex = 4;
+            pnlTranscript.Resize += pnlTranscript_Resize;
             // 
-            // txtBoxTranscript
+            // transcriptViewer
             // 
-            txtBoxTranscript.BorderStyle = BorderStyle.None;
-            txtBoxTranscript.Dock = DockStyle.Fill;
-            txtBoxTranscript.Location = new Point(0, 0);
-            txtBoxTranscript.Name = "txtBoxTranscript";
-            txtBoxTranscript.Size = new Size(1241, 356);
-            txtBoxTranscript.TabIndex = 0;
-            txtBoxTranscript.Text = "";
+            transcriptViewer.BackColor = SystemColors.Window;
+            transcriptViewer.Dock = DockStyle.Fill;
+            transcriptViewer.Font = new Font("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point);
+            transcriptViewer.Location = new Point(0, 0);
+            transcriptViewer.Name = "transcriptViewer";
+            transcriptViewer.Size = new Size(1241, 356);
+            transcriptViewer.TabIndex = 2;
             // 
             // videoOverlay
             // 
@@ -280,7 +279,6 @@
         private Button buttonStop;
         private Panel pnlRightPanel;
         private Panel pnlTranscript;
-        private RichTextBox txtBoxTranscript;
         private Overlay videoOverlay;
         private Panel pnlVideo;
         private PictureBox pbVideo;
@@ -294,5 +292,6 @@
         private Label lblStatusYOLO;
         private PictureBox pbStatusLedYOLO;
         private ImageList imgLstStatusLeds;
+        private TranscriptViewer transcriptViewer;
     }
 }

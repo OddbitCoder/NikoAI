@@ -203,6 +203,22 @@
             Console.WriteLine();
         }
 
+        public List<Snippet> GetTextSnippets()
+        {
+            var snippets = new List<Snippet>();
+            int id = -1;
+            foreach (var word in text)
+            {
+                if (word.SegmentId != id)
+                {
+                    snippets.Add(new Snippet());
+                    id = word.SegmentId;
+                }
+                snippets.Last().Text += word.String;
+            }
+            return snippets;
+        }
+
         public void WriteToFile(string filename, IEnumerable<Word>? snippet = null)
         { 
             using (var sw = new StreamWriter(filename, append: true)) 

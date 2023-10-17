@@ -241,6 +241,7 @@ namespace OddbitAi.AudioRecorder
                         textBuffer.WriteToFile(logFileName); // after
                         File.AppendAllText(logFileName, "\n--\n\n");
                         textBuffer.Print();
+                        transcriptViewer.SetSnippets(textBuffer.GetTextSnippets());
                         Console.WriteLine("--");
                     }
                     SetStatus(pbStatusLedWhisper, true);
@@ -304,6 +305,11 @@ namespace OddbitAi.AudioRecorder
         private void buttonStop_Click(object sender, EventArgs e)
         {
             waveIn.StopRecording();
+        }
+
+        private void pnlTranscript_Resize(object sender, EventArgs e)
+        {
+            transcriptViewer.Refresh();
         }
     }
 }

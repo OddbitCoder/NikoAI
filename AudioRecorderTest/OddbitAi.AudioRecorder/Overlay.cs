@@ -1,4 +1,6 @@
-﻿using OddbitAi.Models.VisionDto;
+﻿#pragma warning disable CA1416
+
+using OddbitAi.Models.VisionDto;
 using System.ComponentModel;
 
 namespace OddbitAi.AudioRecorder
@@ -18,26 +20,26 @@ namespace OddbitAi.AudioRecorder
         private SolidBrush objectAnnotationBrush
             = new SolidBrush(Color.Red);
 
-        private List<DetectedObjectDto> detectedObjects
+        private readonly List<DetectedObjectDto> detectedObjects
             = new();
-        private List<DetectedObjectDto> detectedFaces
+        private readonly List<DetectedObjectDto> detectedFaces
             = new();
 
-        private void ChangePenColor(ref Pen pen, Color color)
+        private static void ChangePenColor(ref Pen pen, Color color)
         { 
             var penWidth = pen.Width;
             pen.Dispose();
             pen = new Pen(color, penWidth);
         }
 
-        private void ChangePenWidth(ref Pen pen, float width)
+        private static void ChangePenWidth(ref Pen pen, float width)
         {
             var color = pen.Color;
             pen.Dispose();
             pen = new Pen(color, width);
         }
 
-        private void ChangeBrushColor(ref SolidBrush brush, Color color)
+        private static void ChangeBrushColor(ref SolidBrush brush, Color color)
         {
             brush.Dispose();
             brush = new SolidBrush(color);
@@ -70,8 +72,8 @@ namespace OddbitAi.AudioRecorder
         {
             get => faceAnnotationPen.Width;
             set 
-            { 
-                ChangePenWidth(ref faceAnnotationPen, value); 
+            {
+                ChangePenWidth(ref faceAnnotationPen, value);
                 ChangePenWidth(ref objectAnnotationPen, value); 
             }
         }
@@ -149,15 +151,13 @@ namespace OddbitAi.AudioRecorder
                     float x = (float)(obj.X * projWidth + ofsX);
                     float y = (float)(obj.Y * projHeight + ofsY);
                     e.Graphics.DrawRectangle(objectAnnotationPen,
-                        x,
-                        y,
+                        x, y,
                         (float)(obj.Width * projWidth),
                         (float)(obj.Height * projHeight)
                         );
                     SizeF textSz = e.Graphics.MeasureString(obj.Name, Font);
                     e.Graphics.FillRectangle(objectAnnotationBrush,
-                        x,
-                        y,
+                        x, y,
                         textSz.Width,
                         textSz.Height
                         );
@@ -171,15 +171,13 @@ namespace OddbitAi.AudioRecorder
                     float x = (float)(obj.X * projWidth + ofsX);
                     float y = (float)(obj.Y * projHeight + ofsY);
                     e.Graphics.DrawRectangle(faceAnnotationPen,
-                        x,
-                        y,
+                        x, y,
                         (float)(obj.Width * projWidth),
                         (float)(obj.Height * projHeight)
                         );
                     SizeF textSz = e.Graphics.MeasureString(obj.Name, Font);
                     e.Graphics.FillRectangle(faceAnnotationBrush,
-                        x,
-                        y,
+                        x, y,
                         textSz.Width,
                         textSz.Height
                         );
@@ -190,6 +188,7 @@ namespace OddbitAi.AudioRecorder
 
         public Overlay()
         {
+            SetStyle(ControlStyles.DoubleBuffer, true);
             base.BackColor = Color.Transparent;
         }
     }
