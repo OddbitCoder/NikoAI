@@ -33,28 +33,28 @@
             buttonRecord = new Button();
             buttonStop = new Button();
             pnlRightPanel = new Panel();
-            pnlLedDeepface = new Panel();
-            lblLedDeepface = new Label();
-            pbLedDeepface = new PictureBox();
-            pnlLedYOLO = new Panel();
-            lblLedYOLO = new Label();
-            pbLedYOLO = new PictureBox();
-            pnlLedWhisper = new Panel();
-            lblLedWhisper = new Label();
-            pbLedWhisper = new PictureBox();
+            pnlStatusDeepface = new Panel();
+            lblStatusDeepface = new Label();
+            pbStatusLedDeepface = new PictureBox();
+            pnlStatusYOLO = new Panel();
+            lblStatusYOLO = new Label();
+            pbStatusLedYOLO = new PictureBox();
+            pnlStatusWhisper = new Panel();
+            lblStatusWhisper = new Label();
+            pbStatusLedWhisper = new PictureBox();
             pnlTranscript = new Panel();
             txtBoxTranscript = new RichTextBox();
             videoOverlay = new Overlay();
             pnlVideo = new Panel();
             pbVideo = new PictureBox();
-            imgLstLights = new ImageList(components);
+            imgLstStatusLeds = new ImageList(components);
             pnlRightPanel.SuspendLayout();
-            pnlLedDeepface.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)pbLedDeepface).BeginInit();
-            pnlLedYOLO.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)pbLedYOLO).BeginInit();
-            pnlLedWhisper.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)pbLedWhisper).BeginInit();
+            pnlStatusDeepface.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)pbStatusLedDeepface).BeginInit();
+            pnlStatusYOLO.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)pbStatusLedYOLO).BeginInit();
+            pnlStatusWhisper.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)pbStatusLedWhisper).BeginInit();
             pnlTranscript.SuspendLayout();
             pnlVideo.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pbVideo).BeginInit();
@@ -85,9 +85,9 @@
             // 
             // pnlRightPanel
             // 
-            pnlRightPanel.Controls.Add(pnlLedDeepface);
-            pnlRightPanel.Controls.Add(pnlLedYOLO);
-            pnlRightPanel.Controls.Add(pnlLedWhisper);
+            pnlRightPanel.Controls.Add(pnlStatusDeepface);
+            pnlRightPanel.Controls.Add(pnlStatusYOLO);
+            pnlRightPanel.Controls.Add(pnlStatusWhisper);
             pnlRightPanel.Controls.Add(buttonRecord);
             pnlRightPanel.Controls.Add(buttonStop);
             pnlRightPanel.Dock = DockStyle.Right;
@@ -96,98 +96,98 @@
             pnlRightPanel.Size = new Size(565, 1081);
             pnlRightPanel.TabIndex = 3;
             // 
-            // pnlLedDeepface
+            // pnlStatusDeepface
             // 
-            pnlLedDeepface.Controls.Add(lblLedDeepface);
-            pnlLedDeepface.Controls.Add(pbLedDeepface);
-            pnlLedDeepface.Dock = DockStyle.Top;
-            pnlLedDeepface.Location = new Point(0, 140);
-            pnlLedDeepface.Name = "pnlLedDeepface";
-            pnlLedDeepface.Size = new Size(565, 70);
-            pnlLedDeepface.TabIndex = 4;
+            pnlStatusDeepface.Controls.Add(lblStatusDeepface);
+            pnlStatusDeepface.Controls.Add(pbStatusLedDeepface);
+            pnlStatusDeepface.Dock = DockStyle.Top;
+            pnlStatusDeepface.Location = new Point(0, 140);
+            pnlStatusDeepface.Name = "pnlStatusDeepface";
+            pnlStatusDeepface.Size = new Size(565, 70);
+            pnlStatusDeepface.TabIndex = 4;
             // 
-            // lblLedDeepface
+            // lblStatusDeepface
             // 
-            lblLedDeepface.Dock = DockStyle.Fill;
-            lblLedDeepface.Location = new Point(70, 0);
-            lblLedDeepface.Name = "lblLedDeepface";
-            lblLedDeepface.Size = new Size(495, 70);
-            lblLedDeepface.TabIndex = 1;
-            lblLedDeepface.Text = "Deepface";
-            lblLedDeepface.TextAlign = ContentAlignment.MiddleLeft;
+            lblStatusDeepface.Dock = DockStyle.Fill;
+            lblStatusDeepface.Location = new Point(70, 0);
+            lblStatusDeepface.Name = "lblStatusDeepface";
+            lblStatusDeepface.Size = new Size(495, 70);
+            lblStatusDeepface.TabIndex = 1;
+            lblStatusDeepface.Text = "Deepface";
+            lblStatusDeepface.TextAlign = ContentAlignment.MiddleLeft;
             // 
-            // pbLedDeepface
+            // pbStatusLedDeepface
             // 
-            pbLedDeepface.Dock = DockStyle.Left;
-            pbLedDeepface.Image = (Image)resources.GetObject("pbLedDeepface.Image");
-            pbLedDeepface.Location = new Point(0, 0);
-            pbLedDeepface.Name = "pbLedDeepface";
-            pbLedDeepface.Size = new Size(70, 70);
-            pbLedDeepface.SizeMode = PictureBoxSizeMode.StretchImage;
-            pbLedDeepface.TabIndex = 0;
-            pbLedDeepface.TabStop = false;
+            pbStatusLedDeepface.Dock = DockStyle.Left;
+            pbStatusLedDeepface.Image = (Image)resources.GetObject("pbStatusLedDeepface.Image");
+            pbStatusLedDeepface.Location = new Point(0, 0);
+            pbStatusLedDeepface.Name = "pbStatusLedDeepface";
+            pbStatusLedDeepface.Size = new Size(70, 70);
+            pbStatusLedDeepface.SizeMode = PictureBoxSizeMode.StretchImage;
+            pbStatusLedDeepface.TabIndex = 0;
+            pbStatusLedDeepface.TabStop = false;
             // 
-            // pnlLedYOLO
+            // pnlStatusYOLO
             // 
-            pnlLedYOLO.Controls.Add(lblLedYOLO);
-            pnlLedYOLO.Controls.Add(pbLedYOLO);
-            pnlLedYOLO.Dock = DockStyle.Top;
-            pnlLedYOLO.Location = new Point(0, 70);
-            pnlLedYOLO.Name = "pnlLedYOLO";
-            pnlLedYOLO.Size = new Size(565, 70);
-            pnlLedYOLO.TabIndex = 3;
+            pnlStatusYOLO.Controls.Add(lblStatusYOLO);
+            pnlStatusYOLO.Controls.Add(pbStatusLedYOLO);
+            pnlStatusYOLO.Dock = DockStyle.Top;
+            pnlStatusYOLO.Location = new Point(0, 70);
+            pnlStatusYOLO.Name = "pnlStatusYOLO";
+            pnlStatusYOLO.Size = new Size(565, 70);
+            pnlStatusYOLO.TabIndex = 3;
             // 
-            // lblLedYOLO
+            // lblStatusYOLO
             // 
-            lblLedYOLO.Dock = DockStyle.Fill;
-            lblLedYOLO.Location = new Point(70, 0);
-            lblLedYOLO.Name = "lblLedYOLO";
-            lblLedYOLO.Size = new Size(495, 70);
-            lblLedYOLO.TabIndex = 1;
-            lblLedYOLO.Text = "YOLO";
-            lblLedYOLO.TextAlign = ContentAlignment.MiddleLeft;
+            lblStatusYOLO.Dock = DockStyle.Fill;
+            lblStatusYOLO.Location = new Point(70, 0);
+            lblStatusYOLO.Name = "lblStatusYOLO";
+            lblStatusYOLO.Size = new Size(495, 70);
+            lblStatusYOLO.TabIndex = 1;
+            lblStatusYOLO.Text = "YOLO";
+            lblStatusYOLO.TextAlign = ContentAlignment.MiddleLeft;
             // 
-            // pbLedYOLO
+            // pbStatusLedYOLO
             // 
-            pbLedYOLO.Dock = DockStyle.Left;
-            pbLedYOLO.Image = (Image)resources.GetObject("pbLedYOLO.Image");
-            pbLedYOLO.Location = new Point(0, 0);
-            pbLedYOLO.Name = "pbLedYOLO";
-            pbLedYOLO.Size = new Size(70, 70);
-            pbLedYOLO.SizeMode = PictureBoxSizeMode.StretchImage;
-            pbLedYOLO.TabIndex = 0;
-            pbLedYOLO.TabStop = false;
+            pbStatusLedYOLO.Dock = DockStyle.Left;
+            pbStatusLedYOLO.Image = (Image)resources.GetObject("pbStatusLedYOLO.Image");
+            pbStatusLedYOLO.Location = new Point(0, 0);
+            pbStatusLedYOLO.Name = "pbStatusLedYOLO";
+            pbStatusLedYOLO.Size = new Size(70, 70);
+            pbStatusLedYOLO.SizeMode = PictureBoxSizeMode.StretchImage;
+            pbStatusLedYOLO.TabIndex = 0;
+            pbStatusLedYOLO.TabStop = false;
             // 
-            // pnlLedWhisper
+            // pnlStatusWhisper
             // 
-            pnlLedWhisper.Controls.Add(lblLedWhisper);
-            pnlLedWhisper.Controls.Add(pbLedWhisper);
-            pnlLedWhisper.Dock = DockStyle.Top;
-            pnlLedWhisper.Location = new Point(0, 0);
-            pnlLedWhisper.Name = "pnlLedWhisper";
-            pnlLedWhisper.Size = new Size(565, 70);
-            pnlLedWhisper.TabIndex = 2;
+            pnlStatusWhisper.Controls.Add(lblStatusWhisper);
+            pnlStatusWhisper.Controls.Add(pbStatusLedWhisper);
+            pnlStatusWhisper.Dock = DockStyle.Top;
+            pnlStatusWhisper.Location = new Point(0, 0);
+            pnlStatusWhisper.Name = "pnlStatusWhisper";
+            pnlStatusWhisper.Size = new Size(565, 70);
+            pnlStatusWhisper.TabIndex = 2;
             // 
-            // lblLedWhisper
+            // lblStatusWhisper
             // 
-            lblLedWhisper.Dock = DockStyle.Fill;
-            lblLedWhisper.Location = new Point(70, 0);
-            lblLedWhisper.Name = "lblLedWhisper";
-            lblLedWhisper.Size = new Size(495, 70);
-            lblLedWhisper.TabIndex = 1;
-            lblLedWhisper.Text = "Whisper";
-            lblLedWhisper.TextAlign = ContentAlignment.MiddleLeft;
+            lblStatusWhisper.Dock = DockStyle.Fill;
+            lblStatusWhisper.Location = new Point(70, 0);
+            lblStatusWhisper.Name = "lblStatusWhisper";
+            lblStatusWhisper.Size = new Size(495, 70);
+            lblStatusWhisper.TabIndex = 1;
+            lblStatusWhisper.Text = "Whisper";
+            lblStatusWhisper.TextAlign = ContentAlignment.MiddleLeft;
             // 
-            // pbLedWhisper
+            // pbStatusLedWhisper
             // 
-            pbLedWhisper.Dock = DockStyle.Left;
-            pbLedWhisper.Image = (Image)resources.GetObject("pbLedWhisper.Image");
-            pbLedWhisper.Location = new Point(0, 0);
-            pbLedWhisper.Name = "pbLedWhisper";
-            pbLedWhisper.Size = new Size(70, 70);
-            pbLedWhisper.SizeMode = PictureBoxSizeMode.StretchImage;
-            pbLedWhisper.TabIndex = 0;
-            pbLedWhisper.TabStop = false;
+            pbStatusLedWhisper.Dock = DockStyle.Left;
+            pbStatusLedWhisper.Image = (Image)resources.GetObject("pbStatusLedWhisper.Image");
+            pbStatusLedWhisper.Location = new Point(0, 0);
+            pbStatusLedWhisper.Name = "pbStatusLedWhisper";
+            pbStatusLedWhisper.Size = new Size(70, 70);
+            pbStatusLedWhisper.SizeMode = PictureBoxSizeMode.StretchImage;
+            pbStatusLedWhisper.TabIndex = 0;
+            pbStatusLedWhisper.TabStop = false;
             // 
             // pnlTranscript
             // 
@@ -241,13 +241,13 @@
             pbVideo.TabIndex = 3;
             pbVideo.TabStop = false;
             // 
-            // imgLstLights
+            // imgLstStatusLeds
             // 
-            imgLstLights.ColorDepth = ColorDepth.Depth32Bit;
-            imgLstLights.ImageStream = (ImageListStreamer)resources.GetObject("imgLstLights.ImageStream");
-            imgLstLights.TransparentColor = Color.Transparent;
-            imgLstLights.Images.SetKeyName(0, "off");
-            imgLstLights.Images.SetKeyName(1, "on");
+            imgLstStatusLeds.ColorDepth = ColorDepth.Depth32Bit;
+            imgLstStatusLeds.ImageStream = (ImageListStreamer)resources.GetObject("imgLstStatusLeds.ImageStream");
+            imgLstStatusLeds.TransparentColor = Color.Transparent;
+            imgLstStatusLeds.Images.SetKeyName(0, "off");
+            imgLstStatusLeds.Images.SetKeyName(1, "on");
             // 
             // AudioRecorderMainForm
             // 
@@ -262,12 +262,12 @@
             FormClosing += AudioRecorderMainForm_FormClosing;
             Load += AudioRecorderMainForm_Load;
             pnlRightPanel.ResumeLayout(false);
-            pnlLedDeepface.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)pbLedDeepface).EndInit();
-            pnlLedYOLO.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)pbLedYOLO).EndInit();
-            pnlLedWhisper.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)pbLedWhisper).EndInit();
+            pnlStatusDeepface.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)pbStatusLedDeepface).EndInit();
+            pnlStatusYOLO.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)pbStatusLedYOLO).EndInit();
+            pnlStatusWhisper.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)pbStatusLedWhisper).EndInit();
             pnlTranscript.ResumeLayout(false);
             pnlVideo.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)pbVideo).EndInit();
@@ -284,15 +284,15 @@
         private Overlay videoOverlay;
         private Panel pnlVideo;
         private PictureBox pbVideo;
-        private Panel pnlLedWhisper;
-        private Label lblLedWhisper;
-        private PictureBox pbLedWhisper;
-        private Panel pnlLedDeepface;
-        private Label lblLedDeepface;
-        private PictureBox pbLedDeepface;
-        private Panel pnlLedYOLO;
-        private Label lblLedYOLO;
-        private PictureBox pbLedYOLO;
-        private ImageList imgLstLights;
+        private Panel pnlStatusWhisper;
+        private Label lblStatusWhisper;
+        private PictureBox pbStatusLedWhisper;
+        private Panel pnlStatusDeepface;
+        private Label lblStatusDeepface;
+        private PictureBox pbStatusLedDeepface;
+        private Panel pnlStatusYOLO;
+        private Label lblStatusYOLO;
+        private PictureBox pbStatusLedYOLO;
+        private ImageList imgLstStatusLeds;
     }
 }

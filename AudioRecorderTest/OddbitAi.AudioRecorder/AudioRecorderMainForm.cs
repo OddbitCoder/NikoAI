@@ -72,6 +72,12 @@ namespace OddbitAi.AudioRecorder
         private readonly VideoCapture capture
             = new();
 
+        private void SetStatus(PictureBox picBox, bool on)
+        {
+            picBox.Image = imgLstStatusLeds.Images[on ? "on" : "off"];
+            picBox.Refresh();
+        }
+
         public AudioRecorderMainForm()
         {
             InitializeComponent();
@@ -92,12 +98,12 @@ namespace OddbitAi.AudioRecorder
                     //state.AddDetectedObjects(replyObj);
                     videoOverlay.UpdateObjectAnnotations(replyObj.Objects);
                     Console.WriteLine($"\"{replyObj?.Summary}\"");
-                    pbLedYOLO.Image = imgLstLights.Images["on"];
+                    SetStatus(pbStatusLedYOLO, true);
                 }
                 catch (Exception ex)
                 {
                     //Console.WriteLine(ex);
-                    pbLedYOLO.Image = imgLstLights.Images["off"];
+                    SetStatus(pbStatusLedYOLO, false);
                     videoOverlay.UpdateObjectAnnotations(Array.Empty<DetectedObjectDto>());
                 }
             }
@@ -118,12 +124,12 @@ namespace OddbitAi.AudioRecorder
                     //    }
                     //}
                     //Console.WriteLine();
-                    pbLedDeepface.Image = imgLstLights.Images["on"];
+                    SetStatus(pbStatusLedDeepface, true);
                 }
                 catch (Exception ex)
                 {
                     //Console.WriteLine(ex);
-                    pbLedDeepface.Image = imgLstLights.Images["off"];
+                    SetStatus(pbStatusLedDeepface, false);
                     videoOverlay.UpdateFaceAnnotations(Array.Empty<DetectedObjectDto>());
                 }
             }
@@ -237,12 +243,12 @@ namespace OddbitAi.AudioRecorder
                         textBuffer.Print();
                         Console.WriteLine("--");
                     }
-                    pbLedWhisper.Image = imgLstLights.Images["on"];
+                    SetStatus(pbStatusLedWhisper, true);
                 }
                 catch (Exception ex)
                 {
                     //Console.WriteLine(ex);
-                    pbLedWhisper.Image = imgLstLights.Images["off"];
+                    SetStatus(pbStatusLedWhisper, false);
                 }
             }
 
