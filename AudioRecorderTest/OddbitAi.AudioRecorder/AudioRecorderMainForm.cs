@@ -133,14 +133,15 @@ namespace OddbitAi.AudioRecorder
 
             if (!frame.IsEmpty)
             {
-                pbVideo.Invoke(() => pbVideo.Image = frame.ToBitmap());
+                pbVideo.Image = frame.ToBitmap();
+                var frameBmp = frame.ToBitmap();
                 var ts = DateTime.UtcNow;
                 if (ts - lastYoloFrameTimestamp >= yoloFrameTimeStep && (yoloCallTask == null || yoloCallTask.IsCompleted))
                 {
                     var frameBytes = Array.Empty<byte>();
                     using (var ms = new MemoryStream())
                     {
-                        frame.ToBitmap().Save(ms, ImageFormat.Png);
+                        frameBmp.Save(ms, ImageFormat.Png);
                         frameBytes = ms.ToArray();
                     }
                     yoloCallTask = Task.Run(() => yoloCall(frameBytes));
@@ -152,7 +153,7 @@ namespace OddbitAi.AudioRecorder
                     var frameBytes = Array.Empty<byte>();
                     using (var ms = new MemoryStream())
                     {
-                        frame.ToBitmap().Save(ms, ImageFormat.Png);
+                        frameBmp.Save(ms, ImageFormat.Png);
                         frameBytes = ms.ToArray();
                     }
                     dfCallTask = Task.Run(() => dfCall(frameBytes));
