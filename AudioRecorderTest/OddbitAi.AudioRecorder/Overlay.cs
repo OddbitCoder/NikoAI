@@ -92,6 +92,10 @@ namespace OddbitAi.AudioRecorder
             set => ChangeBrushColor(ref objectAnnotationLabelTextBrush, value);
         }
 
+        [Category("Appearance")]
+        public bool RefreshOnChange { get; set; }
+            = false;
+
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         [EditorBrowsable(EditorBrowsableState.Never)]
         [Bindable(false)]
@@ -109,18 +113,22 @@ namespace OddbitAi.AudioRecorder
         {
             lock (this.detectedObjects)
             {
+                if (!detectedObjects.Any() && !this.detectedObjects.Any()) { return; }
                 this.detectedObjects.Clear();
                 this.detectedObjects.AddRange(detectedObjects);
             }
+            if (RefreshOnChange) { Refresh(); }
         }
 
         public void UpdateFaceAnnotations(IEnumerable<DetectedObjectDto> detectedFaces)
         {
             lock (this.detectedFaces)
             {
+                if (!detectedFaces.Any() && !this.detectedFaces.Any()) { return; }
                 this.detectedFaces.Clear();
                 this.detectedFaces.AddRange(detectedFaces);
             }
+            if (RefreshOnChange) { Refresh(); }
         }
 
         protected override void OnPaint(PaintEventArgs e)

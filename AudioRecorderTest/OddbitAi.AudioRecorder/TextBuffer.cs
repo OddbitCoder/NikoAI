@@ -211,10 +211,14 @@
             {
                 if (word.SegmentId != id)
                 {
-                    snippets.Add(new Snippet());
+                    snippets.Add(new Snippet() { Text = "" });
                     id = word.SegmentId;
                 }
                 snippets.Last().Text += word.String;
+            }
+            foreach (var snippet in snippets)
+            {
+                snippet.Text = snippet.Text!.Trim();
             }
             return snippets;
         }

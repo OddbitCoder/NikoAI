@@ -72,12 +72,6 @@ namespace OddbitAi.AudioRecorder
         private readonly VideoCapture capture
             = new();
 
-        private void SetStatus(PictureBox picBox, bool on)
-        {
-            picBox.Image = imgLstStatusLeds.Images[on ? "on" : "off"];
-            picBox.Refresh();
-        }
-
         public AudioRecorderMainForm()
         {
             InitializeComponent();
@@ -98,12 +92,11 @@ namespace OddbitAi.AudioRecorder
                     //state.AddDetectedObjects(replyObj);
                     videoOverlay.UpdateObjectAnnotations(replyObj.Objects);
                     Console.WriteLine($"\"{replyObj?.Summary}\"");
-                    SetStatus(pbStatusLedYOLO, true);
+                    ledYolo.Status = true;
                 }
                 catch (Exception ex)
                 {
-                    //Console.WriteLine(ex);
-                    SetStatus(pbStatusLedYOLO, false);
+                    ledYolo.Status = false;
                     videoOverlay.UpdateObjectAnnotations(Array.Empty<DetectedObjectDto>());
                 }
             }
@@ -124,12 +117,11 @@ namespace OddbitAi.AudioRecorder
                     //    }
                     //}
                     //Console.WriteLine();
-                    SetStatus(pbStatusLedDeepface, true);
+                    ledDeepface.Status = true;
                 }
                 catch (Exception ex)
                 {
-                    //Console.WriteLine(ex);
-                    SetStatus(pbStatusLedDeepface, false);
+                    ledDeepface.Status = false;
                     videoOverlay.UpdateFaceAnnotations(Array.Empty<DetectedObjectDto>());
                 }
             }
@@ -244,12 +236,12 @@ namespace OddbitAi.AudioRecorder
                         transcriptViewer.SetSnippets(textBuffer.GetTextSnippets());
                         Console.WriteLine("--");
                     }
-                    SetStatus(pbStatusLedWhisper, true);
+                    ledWhisper.Status = true;
                 }
                 catch (Exception ex)
                 {
                     //Console.WriteLine(ex);
-                    SetStatus(pbStatusLedWhisper, false);
+                    ledWhisper.Status = false;
                 }
             }
 
@@ -309,7 +301,12 @@ namespace OddbitAi.AudioRecorder
 
         private void pnlTranscript_Resize(object sender, EventArgs e)
         {
-            transcriptViewer.Refresh();
+            transcriptViewer.Refresh(); // WARNME: why?!
+        }
+
+        private void panel1_Paint(object sender, PaintEventArgs e)
+        {
+
         }
     }
 }
