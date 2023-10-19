@@ -90,14 +90,18 @@ namespace OddbitAi.AudioRecorder
                     //Console.WriteLine(reply);
                     var replyObj = JsonSerializer.Deserialize<VisionModelResponseDto>(reply.Reply, new JsonSerializerOptions { PropertyNameCaseInsensitive = true, Converters = { new JsonStringEnumConverter() } });
                     //state.AddDetectedObjects(replyObj);
-                    videoOverlay.UpdateObjectAnnotations(replyObj.Objects);
+                    Invoke(() => videoOverlay.UpdateObjectAnnotations(replyObj.Objects));
                     Console.WriteLine($"\"{replyObj?.Summary}\"");
                     ledYolo.Status = true;
                 }
                 catch (Exception ex)
                 {
-                    ledYolo.Status = false;
-                    videoOverlay.UpdateObjectAnnotations(Array.Empty<DetectedObjectDto>());
+                    Invoke(() =>
+                    {
+                        ledYolo.Status = false;
+                        videoOverlay.UpdateObjectAnnotations(Array.Empty<DetectedObjectDto>());
+                    });
+                    Thread.Sleep(1000);
                 }
             }
 
@@ -108,21 +112,17 @@ namespace OddbitAi.AudioRecorder
                     var reply = dfClient!.Process(new ProcessRequest { Data = ByteString.CopyFrom(frameBytes) });
                     //Console.WriteLine(reply.Reply);
                     var replyObj = JsonSerializer.Deserialize<VisionModelResponseDto>(reply.Reply, new JsonSerializerOptions { PropertyNameCaseInsensitive = true, Converters = { new JsonStringEnumConverter() } });
-                    videoOverlay.UpdateFaceAnnotations(replyObj.Objects.Where(x => x.Verified));
-                    //foreach (var obj in replyObj?.Objects ?? Array.Empty<DetectedObjectDto>())
-                    //{
-                    //    if (obj.Verified)
-                    //    {
-                    //        Console.Write($"{obj.Name} ");
-                    //    }
-                    //}
-                    //Console.WriteLine();
+                    Invoke(() => videoOverlay.UpdateFaceAnnotations(replyObj.Objects.Where(x => x.Verified)));
                     ledDeepface.Status = true;
                 }
                 catch (Exception ex)
                 {
-                    ledDeepface.Status = false;
-                    videoOverlay.UpdateFaceAnnotations(Array.Empty<DetectedObjectDto>());
+                    Invoke(() =>
+                    {
+                        ledDeepface.Status = false;
+                        videoOverlay.UpdateFaceAnnotations(Array.Empty<DetectedObjectDto>());
+                    });
+                    Thread.Sleep(1000);
                 }
             }
 
@@ -302,11 +302,6 @@ namespace OddbitAi.AudioRecorder
         private void pnlTranscript_Resize(object sender, EventArgs e)
         {
             transcriptViewer.Refresh(); // WARNME: why?!
-        }
-
-        private void panel1_Paint(object sender, PaintEventArgs e)
-        {
-
         }
     }
 }

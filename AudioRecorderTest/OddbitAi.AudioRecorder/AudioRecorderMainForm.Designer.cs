@@ -151,7 +151,6 @@
             videoOverlay.Name = "videoOverlay";
             videoOverlay.ObjectAnnotationColor = Color.Red;
             videoOverlay.ObjectAnnotationLabelTextColor = Color.White;
-            videoOverlay.RefreshOnChange = true;
             videoOverlay.Size = new Size(1241, 725);
             videoOverlay.TabIndex = 4;
             // 
