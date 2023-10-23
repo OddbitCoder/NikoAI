@@ -2,15 +2,8 @@
 {
     public class ChatItem
     {
-        public DateTime Timestamp { get; }
-        public string Text { get; }
-        public string Speaker { get; }
-
-        public ChatItem(DateTime timestamp, string speaker, string text)
-        { 
-            Timestamp = timestamp;
-            Speaker = speaker;
-            Text = text;
-        }
+        public DateTime Timestamp { get; set; }
+        public string? Text { get; set; }
+        public string? Speaker { get; set; }
     }
 }

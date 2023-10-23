@@ -1,19 +1,13 @@
 ﻿#pragma warning disable CA1416
 
 using System.ComponentModel;
+using OddbitAi.Niko.Models;
 
 namespace OddbitAi.Niko.Components
 {
-    public class Snippet
-    {
-        public string? Text { get; set; }
-        public Color Color { get; set; }
-            = Color.Black;
-    }
-
     public partial class TranscriptViewer : Control
     {
-        private readonly List<Snippet> textSnippets
+        private readonly List<TranscriptItem> textSnippets
             = new();
 
         private const float bigNumber
@@ -46,7 +40,7 @@ namespace OddbitAi.Niko.Components
         [EditorBrowsable(EditorBrowsableState.Never)]
         [Bindable(false)]
         [Browsable(false)]
-        public void SetSnippets(List<Snippet> textSnippets)
+        public void SetSnippets(List<TranscriptItem> textSnippets)
         {
             lock (this.textSnippets)
             {

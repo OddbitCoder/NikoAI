@@ -1,5 +1,4 @@
-﻿using OddbitAi.Niko;
-using OddbitAi.Niko.Components;
+﻿using OddbitAi.Niko.Models;
 
 namespace OddbitAi.Niko.Cogs
 {
@@ -206,15 +205,15 @@ namespace OddbitAi.Niko.Cogs
             Console.WriteLine();
         }
 
-        public List<Snippet> GetTextSnippets()
+        public List<TranscriptItem> GetTextSnippets()
         {
-            var snippets = new List<Snippet>();
+            var snippets = new List<TranscriptItem>();
             int id = -1;
             foreach (var word in text)
             {
                 if (word.SegmentId != id)
                 {
-                    snippets.Add(new Snippet() { Text = "" });
+                    snippets.Add(new TranscriptItem() { Text = "" });
                     id = word.SegmentId;
                 }
                 snippets.Last().Text += word.String;
