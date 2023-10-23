@@ -7,7 +7,7 @@ namespace OddbitAi.Niko.Components
 {
     public partial class TranscriptViewer : Control
     {
-        private readonly List<TranscriptItem> textSnippets
+        private readonly List<ChatItem> textSnippets
             = new();
 
         private const float bigNumber
@@ -40,7 +40,7 @@ namespace OddbitAi.Niko.Components
         [EditorBrowsable(EditorBrowsableState.Never)]
         [Bindable(false)]
         [Browsable(false)]
-        public void SetSnippets(List<TranscriptItem> textSnippets)
+        public void SetChatItems(List<ChatItem> textSnippets)
         {
             lock (this.textSnippets)
             {

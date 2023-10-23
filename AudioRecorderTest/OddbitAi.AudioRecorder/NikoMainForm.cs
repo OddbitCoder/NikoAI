@@ -1,3 +1,5 @@
+#pragma warning disable CA1416
+
 using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -14,7 +16,7 @@ using OddbitAi.Niko.Cogs;
 
 namespace OddbitAi.Niko
 {
-    public partial class AudioRecorderMainForm : Form
+    public partial class NikoMainForm : Form
     {
         [DllImport("kernel32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
@@ -63,9 +65,9 @@ namespace OddbitAi.Niko
         private const double noSpeechProbThresh
             = 0.3;
 
-        // state
+        // state machine
 
-        private readonly StateMachine sm
+        private readonly StateMachine stateMachine
             = new();
 
         // cam video
@@ -73,7 +75,7 @@ namespace OddbitAi.Niko
         private readonly VideoCapture capture
             = new();
 
-        public AudioRecorderMainForm()
+        public NikoMainForm()
         {
             InitializeComponent();
             // camera video overlay
@@ -88,14 +90,14 @@ namespace OddbitAi.Niko
                 try
                 {
                     var reply = yoloClient!.Process(new ProcessRequest { Data = ByteString.CopyFrom(frameBytes) });
-                    //Console.WriteLine(reply);
                     var replyObj = JsonSerializer.Deserialize<VisionModelResponseDto>(reply.Reply, new JsonSerializerOptions { PropertyNameCaseInsensitive = true, Converters = { new JsonStringEnumConverter() } });
-                    //state.AddDetectedObjects(replyObj);
-                    Invoke(() => videoOverlay.UpdateObjectAnnotations(replyObj.Objects));
-                    Console.WriteLine($"\"{replyObj?.Summary}\"");
+                    var detectedObjects = replyObj?.Objects ?? Array.Empty<DetectedObjectDto>();
+                    Invoke(() => videoOverlay.UpdateObjectAnnotations(detectedObjects));
+                    stateMachine.AddContext(detectedObjects, null, null);
+                    //Console.WriteLine($"\"{replyObj?.Summary}\"");
                     ledYolo.Status = true;
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     Invoke(() =>
                     {
@@ -111,12 +113,13 @@ namespace OddbitAi.Niko
                 try
                 {
                     var reply = dfClient!.Process(new ProcessRequest { Data = ByteString.CopyFrom(frameBytes) });
-                    //Console.WriteLine(reply.Reply);
                     var replyObj = JsonSerializer.Deserialize<VisionModelResponseDto>(reply.Reply, new JsonSerializerOptions { PropertyNameCaseInsensitive = true, Converters = { new JsonStringEnumConverter() } });
-                    Invoke(() => videoOverlay.UpdateFaceAnnotations(replyObj.Objects.Where(x => x.Verified)));
+                    var detectedFaces = replyObj?.Objects?.Where(x => x.Verified) ?? Array.Empty<DetectedObjectDto>();
+                    Invoke(() => videoOverlay.UpdateFaceAnnotations(detectedFaces));
+                    stateMachine.AddContext(null, detectedFaces, null);
                     ledDeepface.Status = true;
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     Invoke(() =>
                     {
@@ -234,7 +237,9 @@ namespace OddbitAi.Niko
                         textBuffer.WriteToFile(logFileName); // after
                         File.AppendAllText(logFileName, "\n--\n\n");
                         textBuffer.Print();
-                        transcriptViewer.SetSnippets(textBuffer.GetTextSnippets());
+                        var chatItems = textBuffer.GetChatItems();
+                        transcriptViewer.SetChatItems(chatItems);
+                        stateMachine.AddContext(null, null, chatItems);
                         Console.WriteLine("--");
                     }
                     ledWhisper.Status = true;

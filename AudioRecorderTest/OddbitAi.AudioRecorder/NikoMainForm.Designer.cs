@@ -3,7 +3,7 @@ using OddbitAi.Niko.Components;
 
 namespace OddbitAi.Niko
 {
-    partial class AudioRecorderMainForm
+    partial class NikoMainForm
     {
         /// <summary>
         ///  Required designer variable.

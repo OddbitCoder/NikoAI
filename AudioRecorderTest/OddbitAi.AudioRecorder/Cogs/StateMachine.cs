@@ -39,9 +39,9 @@ namespace OddbitAi.Niko.Cogs
         }
 
         public void AddContext(
-            IEnumerable<DetectedObjectDto> detectedObjects,
-            IEnumerable<DetectedObjectDto> detectedFaces,
-            IEnumerable<ChatItem> chatHistory
+            IEnumerable<DetectedObjectDto>? detectedObjects,
+            IEnumerable<DetectedObjectDto>? detectedFaces,
+            IEnumerable<ChatItem>? chatHistory
         )
         {
             var ctx = new Context

@@ -205,15 +205,15 @@ namespace OddbitAi.Niko.Cogs
             Console.WriteLine();
         }
 
-        public List<TranscriptItem> GetTextSnippets()
+        public List<ChatItem> GetChatItems()
         {
-            var snippets = new List<TranscriptItem>();
+            var snippets = new List<ChatItem>();
             int id = -1;
             foreach (var word in text)
             {
                 if (word.SegmentId != id)
                 {
-                    snippets.Add(new TranscriptItem() { Text = "" });
+                    snippets.Add(new ChatItem() { Text = "" });
                     id = word.SegmentId;
                 }
                 snippets.Last().Text += word.String;
