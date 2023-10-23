@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace OddbitAi.AudioRecorder
+namespace OddbitAi.Niko.Components
 {
     public partial class StatusLed : UserControl
     {

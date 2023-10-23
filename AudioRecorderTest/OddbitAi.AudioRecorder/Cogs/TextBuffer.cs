@@ -1,4 +1,7 @@
-﻿namespace OddbitAi.AudioRecorder
+﻿using OddbitAi.Niko;
+using OddbitAi.Niko.Components;
+
+namespace OddbitAi.Niko.Cogs
 {
     internal class TextBuffer
     {
@@ -40,7 +43,7 @@
         }
 
         // finds all words in 'text' that overlap with 'word' (ignores content)
-        public static List<int> FindOverlappingWordsNoTokenCheck(Word word, List<Word> text, TimeSpan thresh) 
+        public static List<int> FindOverlappingWordsNoTokenCheck(Word word, List<Word> text, TimeSpan thresh)
         {
             var matches = new List<int>();
             for (int i = 0; i < text.Count; i++)
@@ -169,11 +172,11 @@
                 }
                 else
                 {
-                    if (!Append(text, snippet, (Word word, List<Word> text) => FindOverlappingWords(word, text)))
+                    if (!Append(text, snippet, (word, text) => FindOverlappingWords(word, text)))
                     {
-                        if (!Append(text, snippet, (Word word, List<Word> text) => FindOverlappingWordsNoTokenCheck(word, text, TimeSpan.FromMilliseconds(200)))) // WARNME: hardcoded threshold
+                        if (!Append(text, snippet, (word, text) => FindOverlappingWordsNoTokenCheck(word, text, TimeSpan.FromMilliseconds(200)))) // WARNME: hardcoded threshold
                         {
-                             // none of the heuristics work, do whatever
+                            // none of the heuristics work, do whatever
                             text.Add(new Word
                             {
                                 String = " (...)",
@@ -194,7 +197,7 @@
         }
 
         public void Print()
-        { 
+        {
             foreach (var word in text)
             {
                 //Console.Write(word.String + "/" + word.SegmentId);
@@ -224,8 +227,8 @@
         }
 
         public void WriteToFile(string filename, IEnumerable<Word>? snippet = null)
-        { 
-            using (var sw = new StreamWriter(filename, append: true)) 
+        {
+            using (var sw = new StreamWriter(filename, append: true))
             {
                 foreach (var word in snippet ?? text)
                 {

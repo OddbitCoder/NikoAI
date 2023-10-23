@@ -1,4 +1,4 @@
-﻿namespace OddbitAi.AudioRecorder
+﻿namespace OddbitAi.Niko.Components
 {
     public partial class Divider : UserControl
     {

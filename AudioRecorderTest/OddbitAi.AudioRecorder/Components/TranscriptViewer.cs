@@ -2,10 +2,10 @@
 
 using System.ComponentModel;
 
-namespace OddbitAi.AudioRecorder
+namespace OddbitAi.Niko.Components
 {
     public class Snippet
-    { 
+    {
         public string? Text { get; set; }
         public Color Color { get; set; }
             = Color.Black;
@@ -18,7 +18,7 @@ namespace OddbitAi.AudioRecorder
 
         private const float bigNumber
             = 100000;
-        private Brush? brush 
+        private Brush? brush
             = null;
 
         protected override void OnPaint(PaintEventArgs e)
@@ -35,7 +35,7 @@ namespace OddbitAi.AudioRecorder
                         var size = e.Graphics.MeasureString(snippet.Text, Font, Width);
                         y -= size.Height;
                         brush?.Dispose();
-                        e.Graphics.DrawString(snippet.Text, Font, (brush = new SolidBrush(snippet.Color)), new RectangleF(0, y, Width, bigNumber));
+                        e.Graphics.DrawString(snippet.Text, Font, brush = new SolidBrush(snippet.Color), new RectangleF(0, y, Width, bigNumber));
                         if (y < 0) { break; }
                     }
                 }
@@ -58,7 +58,7 @@ namespace OddbitAi.AudioRecorder
 
         public TranscriptViewer()
         {
-            SetStyle(ControlStyles.DoubleBuffer, true); 
+            SetStyle(ControlStyles.DoubleBuffer, true);
         }
     }
 }

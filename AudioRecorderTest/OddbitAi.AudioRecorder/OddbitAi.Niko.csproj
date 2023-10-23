@@ -28,7 +28,7 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Update="Divider.cs">
+    <Compile Update="Components\Divider.cs">
       <SubType>UserControl</SubType>
     </Compile>
   </ItemGroup>

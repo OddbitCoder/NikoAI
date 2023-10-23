@@ -10,8 +10,9 @@ using OddbitAi.Whisper.Dto;
 using OddbitAi.Models;
 using OddbitAi.Models.VisionDto;
 using Emgu.CV;
+using OddbitAi.Niko.Cogs;
 
-namespace OddbitAi.AudioRecorder
+namespace OddbitAi.Niko
 {
     public partial class AudioRecorderMainForm : Form
     {

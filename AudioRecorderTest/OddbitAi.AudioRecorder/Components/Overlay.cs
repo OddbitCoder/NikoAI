@@ -3,22 +3,22 @@
 using OddbitAi.Models.VisionDto;
 using System.ComponentModel;
 
-namespace OddbitAi.AudioRecorder
+namespace OddbitAi.Niko.Components
 {
     public class Overlay : Label
     {
         private Pen faceAnnotationPen
-            = new Pen(Color.Yellow, 8);
+            = new(Color.Yellow, 8);
         private Pen objectAnnotationPen
-            = new Pen(Color.Red, 8);
+            = new(Color.Red, 8);
         private SolidBrush faceAnnotationLabelTextBrush
-            = new SolidBrush(Color.Black);
+            = new(Color.Black);
         private SolidBrush faceAnnotationBrush
-            = new SolidBrush(Color.Yellow);
+            = new(Color.Yellow);
         private SolidBrush objectAnnotationLabelTextBrush
-            = new SolidBrush(Color.White);
+            = new(Color.White);
         private SolidBrush objectAnnotationBrush
-            = new SolidBrush(Color.Red);
+            = new(Color.Red);
 
         private readonly List<DetectedObjectDto> detectedObjects
             = new();
@@ -26,7 +26,7 @@ namespace OddbitAi.AudioRecorder
             = new();
 
         private static void ChangePenColor(ref Pen pen, Color color)
-        { 
+        {
             var penWidth = pen.Width;
             pen.Dispose();
             pen = new Pen(color, penWidth);
@@ -71,10 +71,10 @@ namespace OddbitAi.AudioRecorder
         public float AnnotationLineWidth
         {
             get => faceAnnotationPen.Width;
-            set 
+            set
             {
                 ChangePenWidth(ref faceAnnotationPen, value);
-                ChangePenWidth(ref objectAnnotationPen, value); 
+                ChangePenWidth(ref objectAnnotationPen, value);
             }
         }
 
@@ -113,7 +113,7 @@ namespace OddbitAi.AudioRecorder
                 this.detectedObjects.Clear();
                 this.detectedObjects.AddRange(detectedObjects);
             }
-            Refresh(); 
+            Refresh();
         }
 
         public void UpdateFaceAnnotations(IEnumerable<DetectedObjectDto> detectedFaces)
@@ -124,7 +124,7 @@ namespace OddbitAi.AudioRecorder
                 this.detectedFaces.Clear();
                 this.detectedFaces.AddRange(detectedFaces);
             }
-            Refresh(); 
+            Refresh();
         }
 
         protected override void OnPaint(PaintEventArgs e)
@@ -143,7 +143,7 @@ namespace OddbitAi.AudioRecorder
             else
             {
                 projHeight = Height;
-                projWidth = ((double)FrameSize.Width / FrameSize.Height) * Height;
+                projWidth = (double)FrameSize.Width / FrameSize.Height * Height;
             }
             // draw annotations
             double ofsX = (Width - projWidth) / 2;

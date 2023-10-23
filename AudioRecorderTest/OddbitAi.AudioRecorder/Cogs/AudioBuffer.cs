@@ -1,6 +1,6 @@
 ﻿using NAudio.Wave;
 
-namespace OddbitAi.AudioRecorder
+namespace OddbitAi.Niko.Cogs
 {
     internal class AudioBuffer
     {
@@ -11,14 +11,14 @@ namespace OddbitAi.AudioRecorder
         }
 
         private readonly int bufferSize; // in bytes
-        private DateTime? endTime 
+        private DateTime? endTime
             = null;
         private readonly int bytesPerSecond;
 
         private readonly Queue<QueueItem> rawData
             = new();
 
-        public byte[] RawData 
+        public byte[] RawData
             => rawData.Select(x => x.DataByte).ToArray();
         public int RawByteCount
             => rawData.Count;
@@ -37,20 +37,21 @@ namespace OddbitAi.AudioRecorder
 
         public AudioBuffer(int bufferSizeSec, WaveFormat wavInFmt)
         {
-            bufferSize = (wavInFmt.BitsPerSample / 8) * wavInFmt.SampleRate * bufferSizeSec;
+            bufferSize = wavInFmt.BitsPerSample / 8 * wavInFmt.SampleRate * bufferSizeSec;
             bytesPerSecond = wavInFmt.SampleRate * wavInFmt.Channels * (wavInFmt.BitsPerSample / 8);
         }
 
         public void WriteData(byte[] buffer, int bufferLen)
         {
             endTime = DateTime.UtcNow;
-            for (int i = 0; i < bufferLen; i++) 
+            for (int i = 0; i < bufferLen; i++)
             {
-                rawData.Enqueue(new QueueItem {
+                rawData.Enqueue(new QueueItem
+                {
                     DataByte = buffer[i],
                     EndTime = endTime.Value - TimeSpan.FromSeconds((double)(bufferLen - i) / bytesPerSecond)
                 });
-                while (rawData.Count > bufferSize) 
+                while (rawData.Count > bufferSize)
                 {
                     rawData.Dequeue();
                 }

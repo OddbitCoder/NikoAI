@@ -1,4 +1,7 @@
-﻿namespace OddbitAi.AudioRecorder
+﻿using OddbitAi.Niko.Components;
+using OddbitAi.Niko.Components;
+
+namespace OddbitAi.Niko
 {
     partial class AudioRecorderMainForm
     {
@@ -130,7 +133,7 @@
             // ledLlama
             // 
             ledLlama.Dock = DockStyle.Top;
-            ledLlama.Label = "LLaMA";
+            ledLlama.Label = "LLaMA/ChatGPT";
             ledLlama.Location = new Point(0, 210);
             ledLlama.Name = "ledLlama";
             ledLlama.Size = new Size(565, 70);
@@ -229,7 +232,7 @@
             Controls.Add(pnlTranscript);
             Controls.Add(pnlRightPanel);
             Name = "AudioRecorderMainForm";
-            Text = "Audio Recorder Test";
+            Text = "Niko";
             FormClosing += AudioRecorderMainForm_FormClosing;
             Load += AudioRecorderMainForm_Load;
             pnlRightPanel.ResumeLayout(false);
