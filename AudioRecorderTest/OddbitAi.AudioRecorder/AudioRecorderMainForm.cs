@@ -64,7 +64,7 @@ namespace OddbitAi.AudioRecorder
 
         // state
 
-        private readonly State state
+        private readonly StateMachine sm
             = new();
 
         // cam video

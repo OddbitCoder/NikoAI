@@ -31,6 +31,10 @@
             buttonRecord = new Button();
             buttonStop = new Button();
             pnlRightPanel = new Panel();
+            ledStateGreet = new StatusLed();
+            ledStateLookAround = new StatusLed();
+            ledStateIdle = new StatusLed();
+            div = new Divider();
             ledLlama = new StatusLed();
             ledYolo = new StatusLed();
             ledDeepface = new StatusLed();
@@ -69,6 +73,10 @@
             // 
             // pnlRightPanel
             // 
+            pnlRightPanel.Controls.Add(ledStateGreet);
+            pnlRightPanel.Controls.Add(ledStateLookAround);
+            pnlRightPanel.Controls.Add(ledStateIdle);
+            pnlRightPanel.Controls.Add(div);
             pnlRightPanel.Controls.Add(ledLlama);
             pnlRightPanel.Controls.Add(ledYolo);
             pnlRightPanel.Controls.Add(ledDeepface);
@@ -80,6 +88,44 @@
             pnlRightPanel.Name = "pnlRightPanel";
             pnlRightPanel.Size = new Size(565, 1081);
             pnlRightPanel.TabIndex = 3;
+            // 
+            // ledStateGreet
+            // 
+            ledStateGreet.Dock = DockStyle.Top;
+            ledStateGreet.Label = "Greet";
+            ledStateGreet.Location = new Point(0, 463);
+            ledStateGreet.Name = "ledStateGreet";
+            ledStateGreet.Size = new Size(565, 70);
+            ledStateGreet.Status = false;
+            ledStateGreet.TabIndex = 9;
+            // 
+            // ledStateLookAround
+            // 
+            ledStateLookAround.Dock = DockStyle.Top;
+            ledStateLookAround.Label = "LookAround";
+            ledStateLookAround.Location = new Point(0, 393);
+            ledStateLookAround.Name = "ledStateLookAround";
+            ledStateLookAround.Size = new Size(565, 70);
+            ledStateLookAround.Status = false;
+            ledStateLookAround.TabIndex = 8;
+            // 
+            // ledStateIdle
+            // 
+            ledStateIdle.Dock = DockStyle.Top;
+            ledStateIdle.Label = "Idle";
+            ledStateIdle.Location = new Point(0, 323);
+            ledStateIdle.Name = "ledStateIdle";
+            ledStateIdle.Size = new Size(565, 70);
+            ledStateIdle.Status = true;
+            ledStateIdle.TabIndex = 7;
+            // 
+            // div
+            // 
+            div.Dock = DockStyle.Top;
+            div.Location = new Point(0, 280);
+            div.Name = "div";
+            div.Size = new Size(565, 43);
+            div.TabIndex = 6;
             // 
             // ledLlama
             // 
@@ -207,5 +253,9 @@
         private StatusLed ledLlama;
         private StatusLed ledYolo;
         private StatusLed ledDeepface;
+        private StatusLed ledStateIdle;
+        private Divider div;
+        private StatusLed ledStateGreet;
+        private StatusLed ledStateLookAround;
     }
 }
