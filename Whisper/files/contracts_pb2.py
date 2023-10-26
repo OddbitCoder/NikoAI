@@ -13,7 +13,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0f\x63ontracts.proto\"(\n\x13ProcessAudioRequest\x12\x11\n\taudioData\x18\x01 \x01(\x0c\"!\n\x11ProcessAudioReply\x12\x0c\n\x04text\x18\x01 \x01(\t2J\n\x0eWhisperService\x12\x38\n\x0cProcessAudio\x12\x14.ProcessAudioRequest\x1a\x12.ProcessAudioReplyB\x13\xaa\x02\x10OddbitAi.Whisperb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0f\x63ontracts.proto\"\x1e\n\x0eProcessRequest\x12\x0c\n\x04\x64\x61ta\x18\x01 \x01(\x0c\"\x1d\n\x0cProcessReply\x12\r\n\x05reply\x18\x01 \x01(\t29\n\x0cModelService\x12)\n\x07Process\x12\x0f.ProcessRequest\x1a\r.ProcessReplyB\x17\xaa\x02\x14OddbitAi.ModelServerb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -21,11 +21,11 @@ _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'contracts_pb2', _globals)
 if _descriptor._USE_C_DESCRIPTORS == False:
 
   DESCRIPTOR._options = None
-  DESCRIPTOR._serialized_options = b'\252\002\020OddbitAi.Whisper'
-  _globals['_PROCESSAUDIOREQUEST']._serialized_start=19
-  _globals['_PROCESSAUDIOREQUEST']._serialized_end=59
-  _globals['_PROCESSAUDIOREPLY']._serialized_start=61
-  _globals['_PROCESSAUDIOREPLY']._serialized_end=94
-  _globals['_WHISPERSERVICE']._serialized_start=96
-  _globals['_WHISPERSERVICE']._serialized_end=170
+  DESCRIPTOR._serialized_options = b'\252\002\024OddbitAi.ModelServer'
+  _globals['_PROCESSREQUEST']._serialized_start=19
+  _globals['_PROCESSREQUEST']._serialized_end=49
+  _globals['_PROCESSREPLY']._serialized_start=51
+  _globals['_PROCESSREPLY']._serialized_end=80
+  _globals['_MODELSERVICE']._serialized_start=82
+  _globals['_MODELSERVICE']._serialized_end=139
 # @@protoc_insertion_point(module_scope)

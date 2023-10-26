@@ -51,8 +51,8 @@ print("Starting the service...")
 
 lang="en"
 
-class Service(contracts_pb2_grpc.WhisperServiceServicer):
-    def ProcessAudio(self, request, context): 
+class Service(contracts_pb2_grpc.ModelServiceServicer):
+    def Process(self, request, context): 
         # At this moment, this function saves the bytes into a temp file and then uses the model to open this file. 
         # It would be more efficient if this function would receive "raw" bytes and send those directly to the model.
         dir = "/root/.tmp/"
@@ -60,17 +60,17 @@ class Service(contracts_pb2_grpc.WhisperServiceServicer):
             os.makedirs(dir);
         audio_file_name = dir + str(uuid.uuid4()) + ".wav";
         with open(audio_file_name, "wb") as binary_file:
-            binary_file.write(request.audioData)
+            binary_file.write(request.data)
         result = model.transcribe(
-           audio_file_name, language=lang, temperature=0.0, word_timestamps=True 
-        )
+            audio_file_name, language=lang, temperature=0.0, word_timestamps=True 
+            )
         #print(result);
         os.remove(audio_file_name)
-        return contracts_pb2.ProcessAudioReply(text=json.dumps(result))
+        return contracts_pb2.ProcessReply(reply=json.dumps(result))
 
 port = int(sys.argv[1])
 svc = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-contracts_pb2_grpc.add_WhisperServiceServicer_to_server(Service(), svc)
+contracts_pb2_grpc.add_ModelServiceServicer_to_server(Service(), svc)
 svc.add_insecure_port(f"[::]:{port}")
 svc.start()
 

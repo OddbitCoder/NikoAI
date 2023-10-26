@@ -5,7 +5,7 @@ import grpc
 import contracts_pb2 as contracts__pb2
 
 
-class WhisperServiceStub(object):
+class ModelServiceStub(object):
     """Missing associated documentation comment in .proto file."""
 
     def __init__(self, channel):
@@ -14,42 +14,42 @@ class WhisperServiceStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.ProcessAudio = channel.unary_unary(
-                '/WhisperService/ProcessAudio',
-                request_serializer=contracts__pb2.ProcessAudioRequest.SerializeToString,
-                response_deserializer=contracts__pb2.ProcessAudioReply.FromString,
+        self.Process = channel.unary_unary(
+                '/ModelService/Process',
+                request_serializer=contracts__pb2.ProcessRequest.SerializeToString,
+                response_deserializer=contracts__pb2.ProcessReply.FromString,
                 )
 
 
-class WhisperServiceServicer(object):
+class ModelServiceServicer(object):
     """Missing associated documentation comment in .proto file."""
 
-    def ProcessAudio(self, request, context):
+    def Process(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
 
-def add_WhisperServiceServicer_to_server(servicer, server):
+def add_ModelServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'ProcessAudio': grpc.unary_unary_rpc_method_handler(
-                    servicer.ProcessAudio,
-                    request_deserializer=contracts__pb2.ProcessAudioRequest.FromString,
-                    response_serializer=contracts__pb2.ProcessAudioReply.SerializeToString,
+            'Process': grpc.unary_unary_rpc_method_handler(
+                    servicer.Process,
+                    request_deserializer=contracts__pb2.ProcessRequest.FromString,
+                    response_serializer=contracts__pb2.ProcessReply.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'WhisperService', rpc_method_handlers)
+            'ModelService', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
 
 
  # This class is part of an EXPERIMENTAL API.
-class WhisperService(object):
+class ModelService(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
-    def ProcessAudio(request,
+    def Process(request,
             target,
             options=(),
             channel_credentials=None,
@@ -59,8 +59,8 @@ class WhisperService(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/WhisperService/ProcessAudio',
-            contracts__pb2.ProcessAudioRequest.SerializeToString,
-            contracts__pb2.ProcessAudioReply.FromString,
+        return grpc.experimental.unary_unary(request, target, '/ModelService/Process',
+            contracts__pb2.ProcessRequest.SerializeToString,
+            contracts__pb2.ProcessReply.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

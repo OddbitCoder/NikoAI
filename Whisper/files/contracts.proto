@@ -1,15 +1,15 @@
 syntax = "proto3";
 
-option csharp_namespace = "OddbitAi.Whisper";
+option csharp_namespace = "OddbitAi.ModelServer";
 
-message ProcessAudioRequest {
-    bytes audioData = 1;
+message ProcessRequest {
+    bytes data = 1;
 };
 
-message ProcessAudioReply {
-    string text = 1;
+message ProcessReply {
+    string reply = 1;
 }
 
-service WhisperService {
-    rpc ProcessAudio (ProcessAudioRequest) returns (ProcessAudioReply);
+service ModelService {
+    rpc Process (ProcessRequest) returns (ProcessReply);
 }
