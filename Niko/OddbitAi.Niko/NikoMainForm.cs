@@ -7,12 +7,10 @@ using System.Drawing.Imaging;
 using Google.Protobuf;
 using Grpc.Core;
 using NAudio.Wave;
-using OddbitAi.Whisper;
-using OddbitAi.Whisper.Dto;
 using OddbitAi.Models;
-using OddbitAi.Models.VisionDto;
 using Emgu.CV;
 using OddbitAi.Niko.Cogs;
+using OddbitAi.Models.Dto;
 
 namespace OddbitAi.Niko
 {
@@ -52,7 +50,7 @@ namespace OddbitAi.Niko
             = DateTime.UtcNow;
         private DateTime? lastDfFrameTimestamp
             = DateTime.UtcNow;
-        private WhisperService.WhisperServiceClient? whisperClient;
+        private ModelService.ModelServiceClient? whisperClient;
         private ModelService.ModelServiceClient? yoloClient;
         private ModelService.ModelServiceClient? dfClient;
         private string? outputFolder;
@@ -93,7 +91,7 @@ namespace OddbitAi.Niko
                     var replyObj = JsonSerializer.Deserialize<VisionModelResponseDto>(reply.Reply, new JsonSerializerOptions { PropertyNameCaseInsensitive = true, Converters = { new JsonStringEnumConverter() } });
                     var detectedObjects = replyObj?.Objects ?? Array.Empty<DetectedObjectDto>();
                     Invoke(() => videoOverlay.UpdateObjectAnnotations(detectedObjects));
-                    stateMachine.AddContext(detectedObjects, null, null);
+                    stateMachine.AddDetectedObjects(detectedObjects);
                     //Console.WriteLine($"\"{replyObj?.Summary}\"");
                     ledYolo.Status = true;
                 }
@@ -116,7 +114,7 @@ namespace OddbitAi.Niko
                     var replyObj = JsonSerializer.Deserialize<VisionModelResponseDto>(reply.Reply, new JsonSerializerOptions { PropertyNameCaseInsensitive = true, Converters = { new JsonStringEnumConverter() } });
                     var detectedFaces = replyObj?.Objects?.Where(x => x.Verified) ?? Array.Empty<DetectedObjectDto>();
                     Invoke(() => videoOverlay.UpdateFaceAnnotations(detectedFaces));
-                    stateMachine.AddContext(null, detectedFaces, null);
+                    stateMachine.AddDetectedFaces(detectedFaces);
                     ledDeepface.Status = true;
                 }
                 catch (Exception)
@@ -169,7 +167,7 @@ namespace OddbitAi.Niko
             buffer = new(/*N=*/8, waveIn.WaveFormat); // buffer size N seconds
 
             var whisperCh = new Channel("127.0.0.1", 9010, ChannelCredentials.Insecure);
-            whisperClient = new WhisperService.WhisperServiceClient(whisperCh);
+            whisperClient = new ModelService.ModelServiceClient(whisperCh);
 
             var yoloCh = new Channel("127.0.0.1", 9011, ChannelCredentials.Insecure);
             yoloClient = new ModelService.ModelServiceClient(yoloCh);
@@ -191,22 +189,11 @@ namespace OddbitAi.Niko
                     var bytes = buffer.GetWavBytes(waveIn.WaveFormat);
                     DateTime bufferStartTime = buffer.StartTime!.Value;
                     DateTime bufferEndTime = buffer.EndTime!.Value;
-                    var reply = whisperClient.ProcessAudio(new ProcessAudioRequest { AudioData = ByteString.CopyFrom(bytes) });
+                    var reply = whisperClient.Process(new ProcessRequest { Data = ByteString.CopyFrom(bytes) });
                     //buffer.WriteToFile(Path.Combine(outputFolder, buffer.SnapshotId + ".wav"), waveIn.WaveFormat);
-                    var textObj = JsonSerializer.Deserialize<TextDto>(reply.Text, new JsonSerializerOptions { PropertyNameCaseInsensitive = true, Converters = { new JsonStringEnumConverter() } });
+                    var textObj = JsonSerializer.Deserialize<SpeechModelResponseDto>(reply.Reply, new JsonSerializerOptions { PropertyNameCaseInsensitive = true, Converters = { new JsonStringEnumConverter() } });
                     var words = new List<Word>();
-                    if (textObj?.Format == ResponseFormat.NeMo)
-                    {
-                        // handle NeMo response
-                        //Console.WriteLine(textObj.Text);
-                        return;
-                    }
-                    else if (textObj?.Format == ResponseFormat.Exception)
-                    {
-                        //Console.WriteLine(textObj.Text);
-                        return;
-                    }
-                    foreach (var seg in textObj?.Segments ?? Array.Empty<SegmentDto>())
+                    foreach (var seg in textObj?.Segments ?? Array.Empty<SpeechSegmentDto>())
                     {
                         if (seg.NoSpeechProb < noSpeechProbThresh)
                         {
@@ -229,7 +216,7 @@ namespace OddbitAi.Niko
                         File.AppendAllText(logFileName, $"AUDIO BUFFER END TIME {buffer.EndTime:HH:mm:ss.fff}\n");
                         File.AppendAllText(logFileName, "\nTEXT BEFORE ");
                         textBuffer.WriteToFile(logFileName); // before
-                        File.AppendAllText(logFileName, $"\nRAW RESPONSE {reply.Text}\n");
+                        File.AppendAllText(logFileName, $"\nRAW RESPONSE {reply.Reply}\n");
                         File.AppendAllText(logFileName, "\nSNIPPET ");
                         textBuffer.WriteToFile(logFileName, words);
                         textBuffer.AddWords(words, bufferStartTime, bufferEndTime);
@@ -237,16 +224,16 @@ namespace OddbitAi.Niko
                         textBuffer.WriteToFile(logFileName); // after
                         File.AppendAllText(logFileName, "\n--\n\n");
                         textBuffer.Print();
-                        var chatItems = textBuffer.GetChatItems();
+                        var chatItems = textBuffer.CreateChatItems();
                         transcriptViewer.SetChatItems(chatItems);
-                        stateMachine.AddContext(null, null, chatItems);
+                        stateMachine.SetChatContext(chatItems);
                         Console.WriteLine("--");
                     }
                     ledWhisper.Status = true;
                 }
                 catch (Exception ex)
                 {
-                    //Console.WriteLine(ex);
+                    Console.WriteLine(ex);
                     ledWhisper.Status = false;
                 }
             }
@@ -308,6 +295,11 @@ namespace OddbitAi.Niko
         private void pnlTranscript_Resize(object sender, EventArgs e)
         {
             transcriptViewer.Refresh(); // WARNME: why?!
+        }
+
+        private void timer_Tick(object sender, EventArgs e)
+        {
+            stateMachine.Transition();
         }
     }
 }

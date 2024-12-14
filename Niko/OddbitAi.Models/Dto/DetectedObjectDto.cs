@@ -1,4 +1,4 @@
-﻿namespace OddbitAi.Models.VisionDto
+﻿namespace OddbitAi.Models.Dto
 {
     public class DetectedObjectDto
     {

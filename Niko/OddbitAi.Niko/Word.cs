@@ -1,6 +1,6 @@
 ﻿namespace OddbitAi.Niko
 {
-    internal class Word 
+    public class Word 
     {
         public string? String { get; set; }
         public double Probability { get; set; }

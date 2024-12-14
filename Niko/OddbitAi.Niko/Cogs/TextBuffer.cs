@@ -205,7 +205,7 @@ namespace OddbitAi.Niko.Cogs
             Console.WriteLine();
         }
 
-        public List<ChatItem> GetChatItems()
+        public List<ChatItem> CreateChatItems()
         {
             var snippets = new List<ChatItem>();
             int id = -1;
@@ -213,10 +213,11 @@ namespace OddbitAi.Niko.Cogs
             {
                 if (word.SegmentId != id)
                 {
-                    snippets.Add(new ChatItem() { Text = "" });
+                    snippets.Add(new ChatItem());
                     id = word.SegmentId;
                 }
                 snippets.Last().Text += word.String;
+                snippets.Last().Words.Add(word);
             }
             foreach (var snippet in snippets)
             {

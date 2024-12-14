@@ -1,6 +1,6 @@
 ﻿#pragma warning disable CA1416
 
-using OddbitAi.Models.VisionDto;
+using OddbitAi.Models.Dto;
 using System.ComponentModel;
 
 namespace OddbitAi.Niko.Components

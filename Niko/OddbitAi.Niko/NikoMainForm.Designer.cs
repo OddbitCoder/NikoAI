@@ -31,11 +31,12 @@ namespace OddbitAi.Niko
         /// </summary>
         private void InitializeComponent()
         {
+            components = new System.ComponentModel.Container();
             buttonRecord = new Button();
             buttonStop = new Button();
             pnlRightPanel = new Panel();
             ledStateGreet = new StatusLed();
-            ledStateLookAround = new StatusLed();
+            ledStateLookAndListen = new StatusLed();
             ledStateIdle = new StatusLed();
             div = new Divider();
             ledLlama = new StatusLed();
@@ -47,6 +48,7 @@ namespace OddbitAi.Niko
             videoOverlay = new Overlay();
             pnlVideo = new Panel();
             pbVideo = new PictureBox();
+            timer = new System.Windows.Forms.Timer(components);
             pnlRightPanel.SuspendLayout();
             pnlTranscript.SuspendLayout();
             pnlVideo.SuspendLayout();
@@ -77,7 +79,7 @@ namespace OddbitAi.Niko
             // pnlRightPanel
             // 
             pnlRightPanel.Controls.Add(ledStateGreet);
-            pnlRightPanel.Controls.Add(ledStateLookAround);
+            pnlRightPanel.Controls.Add(ledStateLookAndListen);
             pnlRightPanel.Controls.Add(ledStateIdle);
             pnlRightPanel.Controls.Add(div);
             pnlRightPanel.Controls.Add(ledLlama);
@@ -102,15 +104,15 @@ namespace OddbitAi.Niko
             ledStateGreet.Status = false;
             ledStateGreet.TabIndex = 9;
             // 
-            // ledStateLookAround
+            // ledStateLookAndListen
             // 
-            ledStateLookAround.Dock = DockStyle.Top;
-            ledStateLookAround.Label = "LookAround";
-            ledStateLookAround.Location = new Point(0, 393);
-            ledStateLookAround.Name = "ledStateLookAround";
-            ledStateLookAround.Size = new Size(565, 70);
-            ledStateLookAround.Status = false;
-            ledStateLookAround.TabIndex = 8;
+            ledStateLookAndListen.Dock = DockStyle.Top;
+            ledStateLookAndListen.Label = "LookAndListen";
+            ledStateLookAndListen.Location = new Point(0, 393);
+            ledStateLookAndListen.Name = "ledStateLookAndListen";
+            ledStateLookAndListen.Size = new Size(565, 70);
+            ledStateLookAndListen.Status = false;
+            ledStateLookAndListen.TabIndex = 8;
             // 
             // ledStateIdle
             // 
@@ -223,7 +225,12 @@ namespace OddbitAi.Niko
             pbVideo.TabIndex = 3;
             pbVideo.TabStop = false;
             // 
-            // AudioRecorderMainForm
+            // timer
+            // 
+            timer.Enabled = true;
+            timer.Tick += timer_Tick;
+            // 
+            // NikoMainForm
             // 
             AutoScaleDimensions = new SizeF(17F, 41F);
             AutoScaleMode = AutoScaleMode.Font;
@@ -231,7 +238,7 @@ namespace OddbitAi.Niko
             Controls.Add(pnlVideo);
             Controls.Add(pnlTranscript);
             Controls.Add(pnlRightPanel);
-            Name = "AudioRecorderMainForm";
+            Name = "NikoMainForm";
             Text = "Niko";
             FormClosing += AudioRecorderMainForm_FormClosing;
             Load += AudioRecorderMainForm_Load;
@@ -259,6 +266,7 @@ namespace OddbitAi.Niko
         private StatusLed ledStateIdle;
         private Divider div;
         private StatusLed ledStateGreet;
-        private StatusLed ledStateLookAround;
+        private StatusLed ledStateLookAndListen;
+        private System.Windows.Forms.Timer timer;
     }
 }
